@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>星之翼 カスタムランダムセレクト</title>
+    <style>
+        /* ========================================================
+           【新機能】テーマごとのカラー変数定義
+           ======================================================== */
+        /* 1. デフォルト：ダークテーマ */
+        :root {
+            --bg-color: #121212;
+            --container-bg: #1e1e1e;
+            --section-bg: #252525;
+            --card-bg: #2a2a2a;
+            --list-bg: #1a1a1a;
+            --text-main: #ffffff;
+            --text-sub: #aaa;
+            --accent-color: #00ffcc;
+            --border-color: #444;
+            --accent-bg: rgba(0, 255, 204, 0.1);
+            --btn-text: #121212;
+        }
+
+        /* 2. ライトテーマ */
+        [data-theme="light"] {
+            --bg-color: #f5f5f7;
+            --container-bg: #ffffff;
+            --section-bg: #f0f0f2;
+            --card-bg: #e8e8ec;
+            --list-bg: #fafafa;
+            --text-main: #1d1d1f;
+            --text-sub: #555555;
+            --accent-color: #0066cc;
+            --border-color: #cccccc;
+            --accent-bg: rgba(0, 102, 204, 0.1);
+            --btn-text: #ffffff;
+        }
+
+        /* 3. カスタムテーマ（薄いクリーム×濃いオレンジ） */
+        [data-theme="custom"] {
+            --bg-color: #fbf9f1;       /* 薄いクリーム色 */
+            --container-bg: #f7f4e9;   /* やや濃いクリーム色 */
+            --section-bg: #eee9da;     /* セクション背景 */
+            --card-bg: #dfd9c6;        /* 【修正】見出しやカード背景を少し暗くして分かりやすく */
+            --list-bg: #fbf9f1;        /* リスト背景 */
+            --text-main: #000000;      /* 内側の文字は黒 */
+            --text-sub: #444444;       /* サブ文字 */
+            --accent-color: #d35400;   /* 見出し・アクセント：濃いめで少し暗めなオレンジ */
+            --border-color: #cca47e;   /* 馴染むブラウングレーの枠線 */
+            --accent-bg: rgba(211, 84, 0, 0.1);
+            --btn-text: #ffffff;
+        }
+
+        /* ========================================================
+           全体の基本スタイル
+           ======================================================== */
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            text-align: center;
+            padding: 20px;
+            margin: 0;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 20px auto;
+            background: var(--container-bg);
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            transition: background 0.3s;
+        }
+        h1 { color: var(--accent-color); font-size: 28px; margin-bottom: 20px; transition: color 0.3s; }
+        
+        /* テーマ切り替えボタンの配置エリア */
+        .theme-switcher {
+            text-align: right;
+            margin-bottom: 15px;
+        }
+        .btn-theme {
+            background: var(--section-bg);
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+            padding: 6px 14px;
+            font-size: 13px;
+            font-weight: bold;
+            border-radius: 20px;
+            cursor: pointer;
+            margin-left: 5px;
+            transition: 0.2s;
+        }
+        .btn-theme:hover {
+            border-color: var(--accent-color);
+        }
+
+        /* 設定エリアのスタイル */
+        .settings-section {
+            background: var(--section-bg);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: left;
+            transition: background 0.3s;
+        }
+        .settings-section h3 { 
+            margin-top: 0; 
+            color: var(--accent-color); 
+            border-bottom: 1px solid var(--border-color); 
+            padding-bottom: 5px; 
+            font-size: 16px; 
+            transition: color 0.3s, border-color 0.3s;
+        }
+        .flex-wrap { display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 15px; }
+        .checkbox-label { display: flex; align-items: center; gap: 5px; cursor: pointer; }
+        
+        /* コスト別のキャラグループ見出し */
+        .cost-group-title {
+            grid-column: 1 / -1;
+            font-weight: bold;
+            color: var(--accent-color);
+            background: var(--card-bg); /* ここに指定した変数が適応されます */
+            padding: 6px 10px;
+            border-radius: 4px;
+            margin-top: 10px;
+            font-size: 14px;
+            transition: color 0.3s, background 0.3s;
+        }
+        .cost-group-title:first-child { margin-top: 0; }
+
+        /* キャラクター個別オンオフ（スクロールエリア） */
+        .char-pool-container {
+            max-height: 250px;
+            overflow-y: auto;
+            border: 1px solid var(--border-color);
+            padding: 10px;
+            background: var(--list-bg);
+            border-radius: 5px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 8px;
+            transition: border-color 0.3s, background 0.3s;
+        }
+
+        /* メインの操作ボタン */
+        .btn-main {
+            background-color: var(--accent-color); 
+            color: var(--btn-text); 
+            border: none;
+            padding: 15px 40px; font-size: 20px; font-weight: bold;
+            border-radius: 30px; cursor: pointer; transition: 0.2s;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2); margin: 20px 0;
+        }
+        .btn-main:hover { opacity: 0.9; transform: scale(1.02); }
+
+        /* 選出画面（横に4つ並べるグリッド） */
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(180px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+            justify-content: center;
+        }
+        
+        /* カード全体のサイズ */
+        .player-card {
+            background: var(--container-bg); /* 背景との対比のために調整 */
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            padding: 15px;
+            transition: 0.3s;
+            position: relative;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .player-title { font-size: 16px; font-weight: bold; color: var(--text-sub); margin-bottom: 12px; }
+        
+        /* キャラクター表示部分のレイアウト */
+        .char-display { 
+            width: 100%;
+            min-height: 220px; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: flex-start; 
+        }
+        
+        /* アイコン画像（140px固定、フレーム付き） */
+        .char-img { 
+            width: 140px; 
+            height: 140px; 
+            border-radius: 10px; 
+            border: 2px solid var(--accent-color); 
+            object-fit: cover; 
+            margin-bottom: 12px; 
+            background: var(--list-bg); 
+            box-shadow: 0 0 8px rgba(0,0,0,0.1);
+            transition: border-color 0.3s;
+        }
+        
+        /* 文字調整 */
+        .char-name { 
+            font-size: 16px; 
+            font-weight: bold; 
+            word-break: break-all; 
+            line-height: 1.3;
+            margin-bottom: 6px;
+        }
+        .char-cost { 
+            font-size: 13px; 
+            color: var(--accent-color); 
+            background: var(--accent-bg); 
+            padding: 2px 10px; 
+            border-radius: 10px; 
+            font-weight: bold;
+            transition: color 0.3s, background 0.3s;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="theme-switcher">
+        <button class="btn-theme" onclick="setTheme('dark')">ダーク</button>
+        <button class="btn-theme" onclick="setTheme('light')">ライト</button>
+        <button class="btn-theme" onclick="setTheme('custom')">クリーム</button>
+    </div>
+
+    <h1>星之翼 カスタムランダムセレクト</h1>
+
+    <div class="settings-section">
+        <h3>1. コスト設定</h3>
+        <div class="flex-wrap">
+            <div>
+                <strong>抽出コスト：</strong>
+                <label class="checkbox-label" style="display:inline-flex;"><input type="checkbox" class="cost-filter" value="3.0" checked> 3.0</label>
+                <label class="checkbox-label" style="display:inline-flex;"><input type="checkbox" class="cost-filter" value="2.5" checked> 2.5</label>
+                <label class="checkbox-label" style="display:inline-flex;"><input type="checkbox" class="cost-filter" value="2.0" checked> 2.0</label>
+                <label class="checkbox-label" style="display:inline-flex;"><input type="checkbox" class="cost-filter" value="1.5" checked> 1.5</label>
+            </div>
+        </div>
+
+        <h3>2. キャラクターの個別オンオフ（BAN機能）</h3>
+        <div class="char-pool-container" id="individual-toggle-container">
+            </div>
+    </div>
+
+    <button class="btn-main" onclick="rollRandom()">キャラクターを選出する</button>
+
+    <div class="grid-container">
+        <div class="player-card" id="card-0">
+            <div class="player-title">1人目</div>
+            <div class="char-display" id="display-0"><div class="char-name">待機中</div></div>
+        </div>
+        <div class="player-card" id="card-1">
+            <div class="player-title">2人目</div>
+            <div class="char-display" id="display-1"><div class="char-name">待機中</div></div>
+        </div>
+        <div class="player-card" id="card-2">
+            <div class="player-title">3人目</div>
+            <div class="char-display" id="display-2"><div class="char-name">待機中</div></div>
+        </div>
+        <div class="player-card" id="card-3">
+            <div class="player-title">4人目</div>
+            <div class="char-display" id="display-3"><div class="char-name">待機中</div></div>
+        </div>
+    </div>
+</div>
+
+<script>
+// 画像を保存するGitHubのベースURL
+const IMAGE_BASE_URL = "https://raw.githubusercontent.com/ユーザー名/リポジトリ名/main/images/";
+
+// 70キャラクター全員のデータプール
+let characterPool = [
+    // --- コスト 3.0 (18名) ---
+    { id: 0001, name: "グリフィン", kana: "ぐりふぃん", cost: "3.0" },
+    { id: 0002, name: "ヒカリ", kana: "ひかり", cost: "3.0" },
+    { id: 0003, name: "エルフィン", kana: "えるふぃん", cost: "3.0" },
+    { id: 0004, name: "ケルビム", kana: "けるびむ", cost: "3.0" },
+    { id: 0005, name: "シュウウ", kana: "しゅうう", cost: "3.0" },
+    { id: 0006, name: "スズラン", kana: "すずらん", cost: "3.0" },
+    { id: 0007, name: "キャヴァリー", kana: "きゃばりー", cost: "3.0" },
+    { id: 0008, name: "ラジエル", kana: "らじえる", cost: "3.0" },
+    { id: 0009, name: "影", kana: "かげ", cost: "3.0" },
+    { id: 0010, name: "ライン", kana: "らいん", cost: "3.0" },
+    { id: 0011, name: "ロタ", kana: "ろた", cost: "3.0" },
+    { id: 0012, name: "イーザー", kana: "いーざー", cost: "3.0" },
+    { id: 0013, name: "秋雲", kana: "あきぐも", cost: "3.0" },
+    { id: 0014, name: "ベータｰロンギヌス", kana: "べーたーろんぎぬす", cost: "3.0" },
+    { id: 0015, name: "キャミイ", kana: "きゃみい", cost: "3.0" },
+    { id: 0016, name: "セイレン", kana: "せいれん", cost: "3.0" },
+    { id: 0017, name: "無銘", kana: "むめい", cost: "3.0" },
+    { id: 0018, name: "アカツキ", kana: "あかつき", cost: "3.0" },
+
+    // --- コスト 2.5 (18名) ---
+    { id: 0101, name: "フリード", kana: "ふりーど", cost: "2.5" },
+    { id: 0102, name: "カゼ", kana: "かぜ", cost: "2.5" },
+    { id: 0103, name: "シャオリン", kana: "しゃおりん", cost: "2.5" },
+    { id: 0104, name: "シャープ", kana: "しゃーぷ", cost: "2.5" },
+    { id: 0105, name: "アリス", kana: "ありす", cost: "2.5" },
+    { id: 0106, name: "スカイセイバー", kana: "すかいせいばー", cost: "2.5" },
+    { id: 0107, name: "十八号", kana: "じゅうはちごう", cost: "2.5" },
+    { id: 0108, name: "シグナス", kana: "しぐなす", cost: "2.5" },
+    { id: 0109, name: "アンジェリス", kana: "あんじぇりす", cost: "2.5" },
+    { id: 0110, name: "ヴァルキア", kana: "わるきあ", cost: "2.5" },
+    { id: 0111, name: "エヴァ", kana: "えゔぁ", cost: "2.5" },
+    { id: 0112, name: "轟雷改", kana: "ごうらいかい", cost: "2.5" },
+    { id: 0113, name: "稲", kana: "いな", cost: "2.5" },
+    { id: 0114, name: "バーゼラルド", kana: "ばーぜらるど", cost: "2.5" },
+    { id: 0115, name: "ノーラ", kana: "のーら", cost: "2.5" },
+    { id: 0116, name: "ランスロット", kana: "らんすろっと", cost: "2.5" },
+    { id: 0117, name: "サンダーボルト", kana: "さんだーぼると", cost: "2.5" },
+    { id: 0118, name: "ガラハッド・暁", kana: "がらはっど・あかつき", cost: "2.5" },
+    { id: 0119, name: "デッド・アライブ", kana: "でっど・あらいぶ", cost: "2.5" },
+    { id: 0120, name: "ハルカ", kana: "はるか", cost: "2.5" },
+    { id: 0121, name: "ドラグナー", kana: "どらぐなー", cost: "2.5" },
+    { id: 0122, name: "レキ", kana: "れき", cost: "2.5" },
+    { id: 0123, name: "ブラック★ロックシューター", kana: "ぶらっく★ろっくしゅーたー", cost: "2.5" },
+    { id: 0124, name: "デッドマスター", kana: "でっどますたー", cost: "2.5" },
+
+
+
+
+
+    // --- コスト 2.0 (17名) ---
+    { id: 0201, name: "ベータ", kana: "べーた", cost: "2.0" },
+    { id: 0202, name: "デュカリオン", kana: "でゅかりおん", cost: "2.0" },
+    { id: 0203, name: "セラフィム", kana: "せらふぃむ", cost: "2.0" },
+    { id: 0204, name: "アイーダ", kana: "あいーだ", cost: "2.0" },
+    { id: 0205, name: "パラス", kana: "ぱらす", cost: "2.0" },
+    { id: 0206, name: "スコーピオン", kana: "すこーぴおん", cost: "2.0" },
+    { id: 0207, name: "ヴァーチェ", kana: "わーちぇ", cost: "2.0" },
+    { id: 0208, name: "ザハロワ", kana: "ざはろわ", cost: "2.0" },
+    { id: 0209, name: "咲迦", kana: "えみか", cost: "2.0" },
+    { id: 0210, name: "チンニ", kana: "ちんに", cost: "2.0" },
+    { id: 0211, name: "ダークスター", kana: "だーくすたー", cost: "2.0" },
+    { id: 0212, name: "ヒビキ", kana: "ひびき", cost: "2.0" },
+    { id: 0213, name: "スティレット", kana: "すてぃれっと", cost: "2.0" },
+    { id: 0214, name: "ボルゾイ", kana: "ぼるぞい", cost: "2.0" },
+    { id: 0215, name: "キャッティ", kana: "きゃってぃ", cost: "2.0" },
+    { id: 0216, name: "ブリーカー", kana: "ぶりーかー", cost: "2.0" },
+    { id: 0217, name: "ガラハッド", kana: "がらはっど", cost: "2.0" },
+    { id: 0217, name: "フランカー", kana: "ふらんかー", cost: "2.0" },
+    { id: 0217, name: "アイスリン", kana: "あいすりん", cost: "2.0" },
+    { id: 0217, name: "クリスタ", kana: "くりすた", cost: "2.0" },
+    { id: 0217, name: "タチアナ", kana: "たちあな", cost: "2.0" },
+    { id: 0217, name: "フィービー", kana: "ふぃーびー", cost: "2.0" },
+
+    // --- コスト 1.5 (17名) ---
+    { id: 0301, name: "オーキッド", kana: "おーきっど", cost: "1.5" },
+    { id: 0302, name: "スノーウォル", kana: "すのーうぉる", cost: "1.5" },
+    { id: 0303, name: "カタリナ", kana: "かたりな", cost: "1.5" },
+    { id: 0304, name: "ローランド", kana: "ろーらんど", cost: "1.5" },
+    { id: 0305, name: "ヤミン", kana: "やみん", cost: "1.5" }
+ 
+];
+
+// テーマを切り替えるJavaScript関数
+function setTheme(themeName) {
+    if (themeName === 'dark') {
+        document.documentElement.removeAttribute('data-theme');
+    } else {
+        document.documentElement.setAttribute('data-theme', themeName);
+    }
+}
+
+// 初期化処理
+window.onload = function() {
+    const container = document.getElementById("individual-toggle-container");
+    const costOrder = ["3.0", "2.5", "2.0", "1.5"];
+    
+    costOrder.forEach(targetCost => {
+        let group = characterPool.filter(c => c.cost === targetCost);
+        group.sort((a, b) => a.kana.localeCompare(b.kana, 'ja'));
+        
+        if (group.length > 0) {
+            const titleDiv = document.createElement("div");
+            titleDiv.className = "cost-group-title";
+            titleDiv.innerText = `▼ コスト ${targetCost}`;
+            container.appendChild(titleDiv);
+            
+            group.forEach(c => {
+                const label = document.createElement("label");
+                label.className = "checkbox-label";
+                label.innerHTML = `<input type="checkbox" class="char-toggle" value="${c.id}" checked> ${c.name}`;
+                container.appendChild(label);
+            });
+        }
+    });
+};
+
+// メメインルーチン：ランダム選出
+function rollRandom() {
+    const checkedCosts = Array.from(document.querySelectorAll('.cost-filter:checked')).map(el => el.value);
+    const activeCharIds = Array.from(document.querySelectorAll('.char-toggle:checked')).map(el => parseInt(el.value));
+
+    let filteredPool = characterPool.filter(c => {
+        return checkedCosts.includes(c.cost) && activeCharIds.includes(c.id);
+    });
+
+    for (let slot = 0; slot < 4; slot++) {
+        const displayDiv = document.getElementById(`display-${slot}`);
+
+        if (filteredPool.length === 0) {
+            displayDiv.innerHTML = '<div class="char-name" style="color:#ff4444; margin-top:90px;">候補なし</div>';
+            continue;
+        }
+
+        const randomIndex = Math.floor(Math.random() * filteredPool.length);
+        const selectedChar = filteredPool[randomIndex];
+
+        filteredPool.splice(randomIndex, 1);
+
+        const imgUrl = IMAGE_BASE_URL + selectedChar.id + ".png";
+        displayDiv.innerHTML = `
+            <img class="char-img" src="${imgUrl}" alt="${selectedChar.name}" onerror="this.src='https://via.placeholder.com/140?text=No+Image'">
+            <div class="char-name">${selectedChar.name}</div>
+            <div class="char-cost">${selectedChar.cost}</div>
+        `;
+    }
+}
+</script>
+
+</body>
+</html>
