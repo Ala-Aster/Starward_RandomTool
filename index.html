@@ -203,6 +203,23 @@
             transition: border-color 0.3s;
         }
         
+        /* 【新機能】レア画像選出時のエフェクト（キラキラ光る枠線） */
+        .player-card.rare-selected {
+            border-color: #ffcc00;
+            box-shadow: 0 0 15px rgba(255, 204, 0, 0.6);
+        }
+        .player-card.rare-selected .char-img {
+            border-color: #ffcc00;
+        }
+        .player-card.rare-selected .rare-badge {
+            color: #ffcc00;
+            font-size: 11px;
+            font-weight: bold;
+            margin-top: 2px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
         /* 文字調整 */
         .char-name { 
             font-size: 16px; 
@@ -243,6 +260,9 @@
                 <label class="checkbox-label" style="display:inline-flex;"><input type="checkbox" class="cost-filter" value="2.0" checked> 2.0</label>
                 <label class="checkbox-label" style="display:inline-flex;"><input type="checkbox" class="cost-filter" value="1.5" checked> 1.5</label>
             </div>
+            <div style="margin-left: auto; font-size: 12px; color: var(--text-sub); display: flex; align-items: center;">
+                ※レア画像出現確率：10%
+            </div>
         </div>
 
         <h3>2. キャラクターの個別オンオフ（BAN機能）</h3>
@@ -277,10 +297,11 @@
 const IMAGE_BASE_URL = "https://raw.githubusercontent.com/Ala-Aster/Starward_RandomTool/main/images";
 
 // 70キャラクター全員のデータプール (コストごとに c001 から始まるIDを割り振り)
+// ★【新機能】レア画像を用意したキャラに 「hasRare: true」 を追加するだけ！無いキャラは自動的に通常画像になります。
 let characterPool = [
     // --- コスト 3.0 (18名) ---
-    { id: "c001", name: "グリフィン", kana: "ぐりふぃん", cost: "3.0" },
-    { id: "c002", name: "ヒカリ", kana: "ひかり", cost: "3.0" },
+    { id: "c001", name: "グリフィン", kana: "ぐりふぃん", cost: "3.0", hasRare: true }, // 例：レア画像あり
+    { id: "c002", name: "ヒカリ", kana: "ひかり", cost: "3.0", hasRare: true },     // 例：レア画像あり
     { id: "c003", name: "エルフィン", kana: "えるふぃん", cost: "3.0" },
     { id: "c004", name: "ケルビム", kana: "けるびむ", cost: "3.0" },
     { id: "c005", name: "シュウウ", kana: "しゅうう", cost: "3.0" },
@@ -291,7 +312,7 @@ let characterPool = [
     { id: "c010", name: "ライン", kana: "らいん", cost: "3.0" },
     { id: "c011", name: "ロタ", kana: "ろた", cost: "3.0" },
     { id: "c012", name: "イーザー", kana: "いーざー", cost: "3.0" },
-    { id: "c013", name: "秋雲", kana: "あきぐも", cost: "3.0" },
+    { id: "c013", name: "秋雲", kana: "あkiぐも", cost: "3.0" },
     { id: "c014", name: "ベータｰロンギヌス", kana: "べーたーろんぎぬす", cost: "3.0" },
     { id: "c015", name: "キャミイ", kana: "きゃみい", cost: "3.0" },
     { id: "c016", name: "セイレン", kana: "せいれん", cost: "3.0" },
@@ -301,16 +322,16 @@ let characterPool = [
     // --- コスト 2.5 (24名) ---
     { id: "c001", name: "フリード", kana: "ふりーど", cost: "2.5" },
     { id: "c002", name: "カゼ", kana: "かぜ", cost: "2.5" },
-    { id: "c003", name: "シャオリン", kana: "しゃおりん", cost: "2.5" },
+    { id: "c003", name: "シャオリン", kana: "しゃおりん", cost: "2.5", hasRare: true },
     { id: "c004", name: "シャープ", kana: "しゃーぷ", cost: "2.5" },
     { id: "c005", name: "アリス", kana: "ありす", cost: "2.5" },
-    { id: "c006", name: "スカイセイバー", kana: "すかいせいばー", cost: "2.5" },
+    { id: "c006", name: "スカイセイバー", kana: "すkaiせいばー", cost: "2.5" },
     { id: "c007", name: "十八号", kana: "じゅうはちごう", cost: "2.5" },
     { id: "c008", name: "シグナス", kana: "しぐなす", cost: "2.5" },
     { id: "c009", name: "アンジェリス", kana: "あんじぇりす", cost: "2.5" },
     { id: "c010", name: "ヴァルキア", kana: "わるきあ", cost: "2.5" },
     { id: "c011", name: "エヴァ", kana: "えゔぁ", cost: "2.5" },
-    { id: "c012", name: "轟雷改", kana: "ごうらいかい", cost: "2.5" },
+    { id: "c012", name: "轟雷改", kana: "ごうらいkai", cost: "2.5" },
     { id: "c013", name: "稲", kana: "いな", cost: "2.5" },
     { id: "c014", name: "バーゼラルド", kana: "ばーぜらるど", cost: "2.5" },
     { id: "c015", name: "ノーラ", kana: "のーら", cost: "2.5" },
@@ -343,7 +364,7 @@ let characterPool = [
     { id: "c016", name: "ブリーカー", kana: "ぶりーかー", cost: "2.0" },
     { id: "c017", name: "ガラハッド", kana: "がらはっど", cost: "2.0" },
     { id: "c018", name: "フランカー", kana: "ふらんかー", cost: "2.0" },
-    { id: "c019", name: "アイスリン", kana: "あいすりん", cost: "2.0" },
+    { id: "c019", name: "アイスリン", kana: "aiすりん", cost: "2.0" },
     { id: "c020", name: "クリスタ", kana: "くりすた", cost: "2.0" },
     { id: "c021", name: "タチアナ", kana: "たちあな", cost: "2.0" },
     { id: "c022", name: "フィービー", kana: "ふぃーびー", cost: "2.0" },
@@ -383,7 +404,6 @@ window.onload = function() {
             group.forEach(c => {
                 const label = document.createElement("label");
                 label.className = "checkbox-label";
-                // value属性に「コスト_ID」（例: "3.0_c001"）を格納して識別を確実に
                 label.innerHTML = `<input type="checkbox" class="char-toggle" value="${c.cost}_${c.id}" checked> ${c.name}`;
                 container.appendChild(label);
             });
@@ -403,6 +423,10 @@ function rollRandom() {
 
     for (let slot = 0; slot < 4; slot++) {
         const displayDiv = document.getElementById(`display-${slot}`);
+        const cardDiv = document.getElementById(`card-${slot}`);
+
+        // 最初枠のレア演出クラスをリセットしておく
+        cardDiv.classList.remove("rare-selected");
 
         if (filteredPool.length === 0) {
             displayDiv.innerHTML = '<div class="char-name" style="color:#ff4444; margin-top:90px;">候補なし</div>';
@@ -414,12 +438,28 @@ function rollRandom() {
 
         filteredPool.splice(randomIndex, 1);
 
-        // コスト別のフォルダを自動で挟み込んで画像URLを組み立てる（例: .../images/3.0/c001.png）
-        const imgUrl = IMAGE_BASE_URL + "/" + selectedChar.cost + "/" + selectedChar.id + ".png";
+        // --------------------------------------------------------
+        // 【新機能】レア画像選出のロジック
+        // --------------------------------------------------------
+        const RARE_PROBABILITY = 0.10; // 出現確率：10% (0.05にすれば5%、0.20なら20%)
+        let isRareSelected = false;
+        let imageSuffix = "";
+
+        // 「確率に当選」かつ「キャラデータに hasRare: true が設定されている」とき
+        if (Math.random() < RARE_PROBABILITY && selectedChar.hasRare === true) {
+            isRareSelected = true;
+            imageSuffix = "_rare";      // ファイル名を c001_rare.png に変えるための末尾
+            cardDiv.classList.add("rare-selected"); // 金枠のエフェクトを付与
+        }
+
+        // コスト別のフォルダを自動で挟み込んで画像URLを組み立てる
+        const imgUrl = IMAGE_BASE_URL + "/" + selectedChar.cost + "/" + selectedChar.id + imageSuffix + ".png";
+        
         displayDiv.innerHTML = `
             <img class="char-img" src="${imgUrl}" alt="${selectedChar.name}" onerror="this.src='https://via.placeholder.com/140?text=No+Image'">
             <div class="char-name">${selectedChar.name}</div>
             <div class="char-cost">${selectedChar.cost}</div>
+            <div class="rare-badge">${isRareSelected ? '★ RARE IMAGE ★' : ''}</div>
         `;
     }
 }
