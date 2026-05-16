@@ -6,9 +6,8 @@
     <title>星之翼 カスタムランダムセレクト</title>
     <style>
         /* ========================================================
-           【新機能】テーマごとのカラー変数定義
+           テーマごとのカラー変数定義
            ======================================================== */
-        /* 1. デフォルト：ダークテーマ */
         :root {
             --bg-color: #121212;
             --container-bg: #1e1e1e;
@@ -23,7 +22,6 @@
             --btn-text: #121212;
         }
 
-        /* 2. ライトテーマ */
         [data-theme="light"] {
             --bg-color: #f5f5f7;
             --container-bg: #ffffff;
@@ -38,24 +36,21 @@
             --btn-text: #ffffff;
         }
 
-        /* 3. カスタムテーマ（薄いクリーム×濃いオレンジ） */
         [data-theme="custom"] {
-            --bg-color: #fbf9f1;       /* 薄いクリーム色 */
-            --container-bg: #f7f4e9;   /* やや濃いクリーム色 */
-            --section-bg: #eee9da;     /* セクション背景 */
-            --card-bg: #dfd9c6;        /* 見出しやカード背景を少し暗くして分かりやすく */
-            --list-bg: #fbf9f1;        /* リスト背景 */
-            --text-main: #000000;      /* 内側の文字は黒 */
-            --text-sub: #444444;       /* サブ文字 */
-            --accent-color: #d35400;   /* 見出し・アクセント：濃いめで少し暗めなオレンジ */
-            --border-color: #cca47e;   /* 馴染むブラウングレーの枠線 */
+            --bg-color: #fbf9f1;
+            --container-bg: #f7f4e9;
+            --section-bg: #eee9da;
+            --card-bg: #dfd9c6;
+            --list-bg: #fbf9f1;
+            --text-main: #000000;
+            --text-sub: #444444;
+            --accent-color: #d35400;
+            --border-color: #cca47e;
             --accent-bg: rgba(211, 84, 0, 0.1);
             --btn-text: #ffffff;
         }
 
-        /* ========================================================
-           全体の基本スタイル
-           ======================================================== */
+        /* 全体の基本スタイル */
         body {
             font-family: 'Helvetica Neue', Arial, sans-serif;
             background-color: var(--bg-color);
@@ -76,7 +71,6 @@
         }
         h1 { color: var(--accent-color); font-size: 28px; margin-bottom: 20px; transition: color 0.3s; }
         
-        /* テーマ切り替えボタンの配置エリア */
         .theme-switcher {
             text-align: right;
             margin-bottom: 15px;
@@ -93,11 +87,8 @@
             margin-left: 5px;
             transition: 0.2s;
         }
-        .btn-theme:hover {
-            border-color: var(--accent-color);
-        }
+        .btn-theme:hover { border-color: var(--accent-color); }
 
-        /* 設定エリアのスタイル */
         .settings-section {
             background: var(--section-bg);
             padding: 15px;
@@ -117,7 +108,6 @@
         .flex-wrap { display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 15px; }
         .checkbox-label { display: flex; align-items: center; gap: 5px; cursor: pointer; }
         
-        /* コスト別のキャラグループ見出し */
         .cost-group-title {
             grid-column: 1 / -1;
             font-weight: bold;
@@ -131,7 +121,6 @@
         }
         .cost-group-title:first-child { margin-top: 0; }
 
-        /* キャラクター個別オンオフ（スクロールエリア） */
         .char-pool-container {
             max-height: 250px;
             overflow-y: auto;
@@ -145,7 +134,6 @@
             transition: border-color 0.3s, background 0.3s;
         }
 
-        /* メインの操作ボタン */
         .btn-main {
             background-color: var(--accent-color); 
             color: var(--btn-text); 
@@ -156,7 +144,6 @@
         }
         .btn-main:hover { opacity: 0.9; transform: scale(1.02); }
 
-        /* 選出画面（横に4つ並べるグリッド） */
         .grid-container {
             display: grid;
             grid-template-columns: repeat(4, minmax(180px, 1fr));
@@ -165,7 +152,6 @@
             justify-content: center;
         }
         
-        /* カード全体のサイズ */
         .player-card {
             background: var(--container-bg); 
             border: 2px solid var(--border-color);
@@ -180,7 +166,6 @@
         }
         .player-title { font-size: 16px; font-weight: bold; color: var(--text-sub); margin-bottom: 12px; }
         
-        /* キャラクター表示部分のレイアウト */
         .char-display { 
             width: 100%;
             min-height: 220px; 
@@ -190,7 +175,6 @@
             justify-content: flex-start; 
         }
         
-        /* アイコン画像（140px固定、フレーム付き） */
         .char-img { 
             width: 140px; 
             height: 140px; 
@@ -203,7 +187,7 @@
             transition: border-color 0.3s;
         }
         
-        /* 【新機能】レア画像選出時のエフェクト（キラキラ光る枠線） */
+        /* レア画像選出時のエフェクト */
         .player-card.rare-selected {
             border-color: #ffcc00;
             box-shadow: 0 0 15px rgba(255, 204, 0, 0.6);
@@ -220,7 +204,6 @@
             letter-spacing: 1px;
         }
         
-        /* 文字調整 */
         .char-name { 
             font-size: 16px; 
             font-weight: bold; 
@@ -293,15 +276,15 @@
 </div>
 
 <script>
-// 画像を保存するGitHubのベースURL（フォルダ分け対応のため末尾の / を削除）
 const IMAGE_BASE_URL = "https://raw.githubusercontent.com/Ala-Aster/Starward_RandomTool/main/images";
 
-// 70キャラクター全員のデータプール (コストごとに c001 から始まるIDを割り振り)
-// ★【新機能】レア画像を用意したキャラに 「hasRare: true」 を追加するだけ！無いキャラは自動的に通常画像になります。
+// 70キャラクター全員のデータプール
+// ★【新機能】hasRare を「用意したレア画像の枚数の数字」にします。
+// 例：グリフィンはレア1枚（_rare1.png）、ヒカリはレア2枚（_rare1.png, _rare2.png）
 let characterPool = [
     // --- コスト 3.0 (18名) ---
-    { id: "c001", name: "グリフィン", kana: "ぐりふぃん", cost: "3.0", hasRare: true }, // 例：レア画像あり
-    { id: "c002", name: "ヒカリ", kana: "ひかり", cost: "3.0", hasRare: true },     // 例：レア画像あり
+    { id: "c001", name: "グリフィン", kana: "ぐりふぃん", cost: "3.0", hasRare: 1 }, // レア画像が2枚ある状態
+    { id: "c002", name: "ヒカリ", kana: "ひかり", cost: "3.0", hasRare: 2 },     // レア画像が1枚ある状態
     { id: "c003", name: "エルフィン", kana: "えるふぃん", cost: "3.0" },
     { id: "c004", name: "ケルビム", kana: "けるびむ", cost: "3.0" },
     { id: "c005", name: "シュウウ", kana: "しゅうう", cost: "3.0" },
@@ -322,7 +305,7 @@ let characterPool = [
     // --- コスト 2.5 (24名) ---
     { id: "c001", name: "フリード", kana: "ふりーど", cost: "2.5" },
     { id: "c002", name: "カゼ", kana: "かぜ", cost: "2.5" },
-    { id: "c003", name: "シャオリン", kana: "しゃおりん", cost: "2.5", hasRare: true },
+    { id: "c003", name: "シャオリン", kana: "しゃおりん", cost: "2.5", hasRare: 1 },
     { id: "c004", name: "シャープ", kana: "しゃーぷ", cost: "2.5" },
     { id: "c005", name: "アリス", kana: "ありす", cost: "2.5" },
     { id: "c006", name: "スカイセイバー", kana: "すkaiせいばー", cost: "2.5" },
@@ -377,7 +360,6 @@ let characterPool = [
     { id: "c005", name: "ヤミン", kana: "やみん", cost: "1.5" }
 ];
 
-// テーマを切り替えるJavaScript関数
 function setTheme(themeName) {
     if (themeName === 'dark') {
         document.documentElement.removeAttribute('data-theme');
@@ -386,7 +368,6 @@ function setTheme(themeName) {
     }
 }
 
-// 初期化処理
 window.onload = function() {
     const container = document.getElementById("individual-toggle-container");
     const costOrder = ["3.0", "2.5", "2.0", "1.5"];
@@ -411,7 +392,6 @@ window.onload = function() {
     });
 };
 
-// メインルーチン：ランダム選出
 function rollRandom() {
     const checkedCosts = Array.from(document.querySelectorAll('.cost-filter:checked')).map(el => el.value);
     const activeCharKeys = Array.from(document.querySelectorAll('.char-toggle:checked')).map(el => el.value);
@@ -425,7 +405,6 @@ function rollRandom() {
         const displayDiv = document.getElementById(`display-${slot}`);
         const cardDiv = document.getElementById(`card-${slot}`);
 
-        // 最初枠のレア演出クラスをリセットしておく
         cardDiv.classList.remove("rare-selected");
 
         if (filteredPool.length === 0) {
@@ -439,27 +418,32 @@ function rollRandom() {
         filteredPool.splice(randomIndex, 1);
 
         // --------------------------------------------------------
-        // 【新機能】レア画像選出のロジック
+        // 【アップデート】複数レア画像対応の選出ロジック
         // --------------------------------------------------------
-        const RARE_PROBABILITY = 0.10; // 出現確率：10% (0.05にすれば5%、0.20なら20%)
+        const RARE_PROBABILITY = 0.10; // 出現確率：10%
         let isRareSelected = false;
         let imageSuffix = "";
 
-        // 「確率に当選」かつ「キャラデータに hasRare: true が設定されている」とき
-        if (Math.random() < RARE_PROBABILITY && selectedChar.hasRare === true) {
+        // 「確率に当選」かつ「hasRareが設定されており、かつ1以上である」とき
+        if (Math.random() < RARE_PROBABILITY && selectedChar.hasRare && selectedChar.hasRare >= 1) {
             isRareSelected = true;
-            imageSuffix = "_rare";      // ファイル名を c001_rare.png に変えるための末尾
-            cardDiv.classList.add("rare-selected"); // 金枠のエフェクトを付与
+            
+            // 1から設定枚数(hasRareの数値)までの間でランダムに1つの数字を決める
+            // 例: hasRareが2なら、1か2のどちらかになる
+            const rareNum = Math.floor(Math.random() * selectedChar.hasRare) + 1;
+            
+            imageSuffix = "_rare" + rareNum; // 末尾を _rare1 や _rare2 に決定
+            cardDiv.classList.add("rare-selected");
         }
 
-        // コスト別のフォルダを自動で挟み込んで画像URLを組み立てる
+        // URLを組み立てる (例: images/3.0/c001_rare2.png)
         const imgUrl = IMAGE_BASE_URL + "/" + selectedChar.cost + "/" + selectedChar.id + imageSuffix + ".png";
         
         displayDiv.innerHTML = `
             <img class="char-img" src="${imgUrl}" alt="${selectedChar.name}" onerror="this.src='https://via.placeholder.com/140?text=No+Image'">
             <div class="char-name">${selectedChar.name}</div>
             <div class="char-cost">${selectedChar.cost}</div>
-            <div class="rare-badge">${isRareSelected ? '★ RARE IMAGE ★' : ''}</div>
+            <div class="rare-badge">${isRareSelected ? '★ 運がいいね ★' : ''}</div>
         `;
     }
 }
