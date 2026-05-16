@@ -43,7 +43,7 @@
             --bg-color: #fbf9f1;       /* 薄いクリーム色 */
             --container-bg: #f7f4e9;   /* やや濃いクリーム色 */
             --section-bg: #eee9da;     /* セクション背景 */
-            --card-bg: #dfd9c6;        /* 【修正】見出しやカード背景を少し暗くして分かりやすく */
+            --card-bg: #dfd9c6;        /* 見出しやカード背景を少し暗くして分かりやすく */
             --list-bg: #fbf9f1;        /* リスト背景 */
             --text-main: #000000;      /* 内側の文字は黒 */
             --text-sub: #444444;       /* サブ文字 */
@@ -122,7 +122,7 @@
             grid-column: 1 / -1;
             font-weight: bold;
             color: var(--accent-color);
-            background: var(--card-bg); /* ここに指定した変数が適応されます */
+            background: var(--card-bg); 
             padding: 6px 10px;
             border-radius: 4px;
             margin-top: 10px;
@@ -167,7 +167,7 @@
         
         /* カード全体のサイズ */
         .player-card {
-            background: var(--container-bg); /* 背景との対比のために調整 */
+            background: var(--container-bg); 
             border: 2px solid var(--border-color);
             border-radius: 12px;
             padding: 15px;
@@ -247,7 +247,7 @@
 
         <h3>2. キャラクターの個別オンオフ（BAN機能）</h3>
         <div class="char-pool-container" id="individual-toggle-container">
-            </div>
+        </div>
     </div>
 
     <button class="btn-main" onclick="rollRandom()">キャラクターを選出する</button>
@@ -273,92 +273,87 @@
 </div>
 
 <script>
-// 画像を保存するGitHubのベースURL
+// 画像を保存するGitHubのベースURL（フォルダ分け対応のため末尾の / を削除）
 const IMAGE_BASE_URL = "https://raw.githubusercontent.com/Ala-Aster/Starward_RandomTool/main/images";
 
-// 70キャラクター全員のデータプール
+// 70キャラクター全員のデータプール (IDの重複と頭の0埋めバグを修正)
 let characterPool = [
     // --- コスト 3.0 (18名) ---
-    { id: 0001, name: "グリフィン", kana: "ぐりふぃん", cost: "3.0" },
-    { id: 0002, name: "ヒカリ", kana: "ひかり", cost: "3.0" },
-    { id: 0003, name: "エルフィン", kana: "えるふぃん", cost: "3.0" },
-    { id: 0004, name: "ケルビム", kana: "けるびむ", cost: "3.0" },
-    { id: 0005, name: "シュウウ", kana: "しゅうう", cost: "3.0" },
-    { id: 0006, name: "スズラン", kana: "すずらん", cost: "3.0" },
-    { id: 0007, name: "キャヴァリー", kana: "きゃばりー", cost: "3.0" },
-    { id: 0008, name: "ラジエル", kana: "らじえる", cost: "3.0" },
-    { id: 0009, name: "影", kana: "かげ", cost: "3.0" },
-    { id: 0010, name: "ライン", kana: "らいん", cost: "3.0" },
-    { id: 0011, name: "ロタ", kana: "ろた", cost: "3.0" },
-    { id: 0012, name: "イーザー", kana: "いーざー", cost: "3.0" },
-    { id: 0013, name: "秋雲", kana: "あきぐも", cost: "3.0" },
-    { id: 0014, name: "ベータｰロンギヌス", kana: "べーたーろんぎぬす", cost: "3.0" },
-    { id: 0015, name: "キャミイ", kana: "きゃみい", cost: "3.0" },
-    { id: 0016, name: "セイレン", kana: "せいれん", cost: "3.0" },
-    { id: 0017, name: "無銘", kana: "むめい", cost: "3.0" },
-    { id: 0018, name: "アカツキ", kana: "あかつき", cost: "3.0" },
+    { id: 1, name: "グリフィン", kana: "ぐりふぃん", cost: "3.0" },
+    { id: 2, name: "ヒカリ", kana: "ひかり", cost: "3.0" },
+    { id: 3, name: "エルフィン", kana: "えるふぃん", cost: "3.0" },
+    { id: 4, name: "ケルビム", kana: "けるびむ", cost: "3.0" },
+    { id: 5, name: "シュウウ", kana: "しゅうう", cost: "3.0" },
+    { id: 6, name: "スズラン", kana: "すずらん", cost: "3.0" },
+    { id: 7, name: "キャヴァリー", kana: "きゃばりー", cost: "3.0" },
+    { id: 8, name: "ラジエル", kana: "らじえる", cost: "3.0" },
+    { id: 9, name: "影", kana: "かげ", cost: "3.0" },
+    { id: 10, name: "ライン", kana: "らいん", cost: "3.0" },
+    { id: 11, name: "ロタ", kana: "ろた", cost: "3.0" },
+    { id: 12, name: "イーザー", kana: "いーざー", cost: "3.0" },
+    { id: 13, name: "秋雲", kana: "あきぐも", cost: "3.0" },
+    { id: 14, name: "ベータｰロンギヌス", kana: "べーたーろんぎぬす", cost: "3.0" },
+    { id: 15, name: "キャミイ", kana: "きゃみい", cost: "3.0" },
+    { id: 16, name: "セイレン", kana: "せいれん", cost: "3.0" },
+    { id: 17, name: "無銘", kana: "むめい", cost: "3.0" },
+    { id: 18, name: "アカツキ", kana: "あかつき", cost: "3.0" },
 
-    // --- コスト 2.5 (18名) ---
-    { id: 0101, name: "フリード", kana: "ふりーど", cost: "2.5" },
-    { id: 0102, name: "カゼ", kana: "かぜ", cost: "2.5" },
-    { id: 0103, name: "シャオリン", kana: "しゃおりん", cost: "2.5" },
-    { id: 0104, name: "シャープ", kana: "しゃーぷ", cost: "2.5" },
-    { id: 0105, name: "アリス", kana: "ありす", cost: "2.5" },
-    { id: 0106, name: "スカイセイバー", kana: "すかいせいばー", cost: "2.5" },
-    { id: 0107, name: "十八号", kana: "じゅうはちごう", cost: "2.5" },
-    { id: 0108, name: "シグナス", kana: "しぐなす", cost: "2.5" },
-    { id: 0109, name: "アンジェリス", kana: "あんじぇりす", cost: "2.5" },
-    { id: 0110, name: "ヴァルキア", kana: "わるきあ", cost: "2.5" },
-    { id: 0111, name: "エヴァ", kana: "えゔぁ", cost: "2.5" },
-    { id: 0112, name: "轟雷改", kana: "ごうらいかい", cost: "2.5" },
-    { id: 0113, name: "稲", kana: "いな", cost: "2.5" },
-    { id: 0114, name: "バーゼラルド", kana: "ばーぜらるど", cost: "2.5" },
-    { id: 0115, name: "ノーラ", kana: "のーら", cost: "2.5" },
-    { id: 0116, name: "ランスロット", kana: "らんすろっと", cost: "2.5" },
-    { id: 0117, name: "サンダーボルト", kana: "さんだーぼると", cost: "2.5" },
-    { id: 0118, name: "ガラハッド・暁", kana: "がらはっど・あかつき", cost: "2.5" },
-    { id: 0119, name: "デッド・アライブ", kana: "でっど・あらいぶ", cost: "2.5" },
-    { id: 0120, name: "ハルカ", kana: "はるか", cost: "2.5" },
-    { id: 0121, name: "ドラグナー", kana: "どらぐなー", cost: "2.5" },
-    { id: 0122, name: "レキ", kana: "れき", cost: "2.5" },
-    { id: 0123, name: "ブラック★ロックシューター", kana: "ぶらっく★ろっくしゅーたー", cost: "2.5" },
-    { id: 0124, name: "デッドマスター", kana: "でっどますたー", cost: "2.5" },
+    // --- コスト 2.5 (24名) ---
+    { id: 101, name: "フリード", kana: "ふりーど", cost: "2.5" },
+    { id: 102, name: "カゼ", kana: "かぜ", cost: "2.5" },
+    { id: 103, name: "シャオリン", kana: "しゃおりん", cost: "2.5" },
+    { id: 104, name: "シャープ", kana: "しゃーぷ", cost: "2.5" },
+    { id: 105, name: "アリス", kana: "ありす", cost: "2.5" },
+    { id: 106, name: "スカイセイバー", kana: "すかいせいばー", cost: "2.5" },
+    { id: 107, name: "十八号", kana: "じゅうはちごう", cost: "2.5" },
+    { id: 108, name: "シグナス", kana: "しぐなす", cost: "2.5" },
+    { id: 109, name: "アンジェリス", kana: "あんじぇりす", cost: "2.5" },
+    { id: 110, name: "ヴァルキア", kana: "わるきあ", cost: "2.5" },
+    { id: 111, name: "エヴァ", kana: "えゔぁ", cost: "2.5" },
+    { id: 112, name: "轟雷改", kana: "ごうらいかい", cost: "2.5" },
+    { id: 113, name: "稲", kana: "いな", cost: "2.5" },
+    { id: 114, name: "バーゼラルド", kana: "ばーぜらるど", cost: "2.5" },
+    { id: 115, name: "ノーラ", kana: "のーら", cost: "2.5" },
+    { id: 116, name: "ランスロット", kana: "らんすろっと", cost: "2.5" },
+    { id: 117, name: "サンダーボルト", kana: "さんだーぼると", cost: "2.5" },
+    { id: 118, name: "ガラハッド・暁", kana: "がらはっど・あかつき", cost: "2.5" },
+    { id: 119, name: "デッド・アライブ", kana: "でっど・あらいぶ", cost: "2.5" },
+    { id: 120, name: "ハルカ", kana: "はるか", cost: "2.5" },
+    { id: 121, name: "ドラグナー", kana: "どらぐなー", cost: "2.5" },
+    { id: 122, name: "レキ", kana: "れき", cost: "2.5" },
+    { id: 123, name: "ブラック★ロックシューター", kana: "ぶらっく★ろっくしゅーたー", cost: "2.5" },
+    { id: 124, name: "デッドマスター", kana: "でっどますたー", cost: "2.5" },
 
+    // --- コスト 2.0 (22名) ---
+    { id: 201, name: "ベータ", kana: "べーた", cost: "2.0" },
+    { id: 202, name: "デュカリオン", kana: "でゅかりおん", cost: "2.0" },
+    { id: 203, name: "セラフィム", kana: "せらふぃむ", cost: "2.0" },
+    { id: 204, name: "アイーダ", kana: "あいーだ", cost: "2.0" },
+    { id: 205, name: "パラス", kana: "ぱらす", cost: "2.0" },
+    { id: 206, name: "スコーピオン", kana: "すこーぴおん", cost: "2.0" },
+    { id: 207, name: "ヴァーチェ", kana: "わーちぇ", cost: "2.0" },
+    { id: 208, name: "ザハロワ", kana: "ざはろわ", cost: "2.0" },
+    { id: 209, name: "咲迦", kana: "えみか", cost: "2.0" },
+    { id: 210, name: "チンニ", kana: "ちんに", cost: "2.0" },
+    { id: 211, name: "ダークスター", kana: "だーくすたー", cost: "2.0" },
+    { id: 212, name: "ヒビキ", kana: "ひびき", cost: "2.0" },
+    { id: 213, name: "スティレット", kana: "すてぃれっと", cost: "2.0" },
+    { id: 214, name: "ボルゾイ", kana: "ぼるぞい", cost: "2.0" },
+    { id: 215, name: "キャッティ", kana: "きゃってぃ", cost: "2.0" },
+    { id: 216, name: "ブリーカー", kana: "ぶりーかー", cost: "2.0" },
+    { id: 217, name: "ガラハッド", kana: "がらはっど", cost: "2.0" },
+    { id: 218, name: "フランカー", kana: "ふらんかー", cost: "2.0" },
+    { id: 219, name: "アイスリン", kana: "あいすりん", cost: "2.0" },
+    { id: 220, name: "クリスタ", kana: "くりすた", cost: "2.0" },
+    { id: 221, name: "タチアナ", kana: "たちあな", cost: "2.0" },
+    { id: 222, name: "フィービー", kana: "ふぃーびー", cost: "2.0" },
 
-
-
-
-    // --- コスト 2.0 (17名) ---
-    { id: 0201, name: "ベータ", kana: "べーた", cost: "2.0" },
-    { id: 0202, name: "デュカリオン", kana: "でゅかりおん", cost: "2.0" },
-    { id: 0203, name: "セラフィム", kana: "せらふぃむ", cost: "2.0" },
-    { id: 0204, name: "アイーダ", kana: "あいーだ", cost: "2.0" },
-    { id: 0205, name: "パラス", kana: "ぱらす", cost: "2.0" },
-    { id: 0206, name: "スコーピオン", kana: "すこーぴおん", cost: "2.0" },
-    { id: 0207, name: "ヴァーチェ", kana: "わーちぇ", cost: "2.0" },
-    { id: 0208, name: "ザハロワ", kana: "ざはろわ", cost: "2.0" },
-    { id: 0209, name: "咲迦", kana: "えみか", cost: "2.0" },
-    { id: 0210, name: "チンニ", kana: "ちんに", cost: "2.0" },
-    { id: 0211, name: "ダークスター", kana: "だーくすたー", cost: "2.0" },
-    { id: 0212, name: "ヒビキ", kana: "ひびき", cost: "2.0" },
-    { id: 0213, name: "スティレット", kana: "すてぃれっと", cost: "2.0" },
-    { id: 0214, name: "ボルゾイ", kana: "ぼるぞい", cost: "2.0" },
-    { id: 0215, name: "キャッティ", kana: "きゃってぃ", cost: "2.0" },
-    { id: 0216, name: "ブリーカー", kana: "ぶりーかー", cost: "2.0" },
-    { id: 0217, name: "ガラハッド", kana: "がらはっど", cost: "2.0" },
-    { id: 0217, name: "フランカー", kana: "ふらんかー", cost: "2.0" },
-    { id: 0217, name: "アイスリン", kana: "あいすりん", cost: "2.0" },
-    { id: 0217, name: "クリスタ", kana: "くりすた", cost: "2.0" },
-    { id: 0217, name: "タチアナ", kana: "たちあな", cost: "2.0" },
-    { id: 0217, name: "フィービー", kana: "ふぃーびー", cost: "2.0" },
-
-    // --- コスト 1.5 (17名) ---
-    { id: 0301, name: "オーキッド", kana: "おーきっど", cost: "1.5" },
-    { id: 0302, name: "スノーウォル", kana: "すのーうぉる", cost: "1.5" },
-    { id: 0303, name: "カタリナ", kana: "かたりな", cost: "1.5" },
-    { id: 0304, name: "ローランド", kana: "ろーらんど", cost: "1.5" },
-    { id: 0305, name: "ヤミン", kana: "やみん", cost: "1.5" }
- 
+    // --- コスト 1.5 (5名) ---
+    { id: 301, name: "オーキッド", kana: "おーきっど", cost: "1.5" },
+    { id: 302, name: "スノーウォル", kana: "すのーうぉる", cost: "1.5" },
+    { id: 303, name: "カタリナ", kana: "かたりな", cost: "1.5" },
+    { id: 304, name: "ローランド", kana: "ろーらんど", cost: "1.5" },
+    { id: 305, name: "ヤミン", kana: "やみん", cost: "1.5" }
 ];
 
 // テーマを切り替えるJavaScript関数
@@ -395,7 +390,7 @@ window.onload = function() {
     });
 };
 
-// メメインルーチン：ランダム選出
+// メインルーチン：ランダム選出
 function rollRandom() {
     const checkedCosts = Array.from(document.querySelectorAll('.cost-filter:checked')).map(el => el.value);
     const activeCharIds = Array.from(document.querySelectorAll('.char-toggle:checked')).map(el => parseInt(el.value));
@@ -417,7 +412,8 @@ function rollRandom() {
 
         filteredPool.splice(randomIndex, 1);
 
-        const imgUrl = IMAGE_BASE_URL + selectedChar.id + ".png";
+        // 【新機能】コスト別のフォルダを自動で挟み込んで画像URLを組み立てる設定
+        const imgUrl = IMAGE_BASE_URL + "/" + selectedChar.cost + "/" + selectedChar.id + ".png";
         displayDiv.innerHTML = `
             <img class="char-img" src="${imgUrl}" alt="${selectedChar.name}" onerror="this.src='https://via.placeholder.com/140?text=No+Image'">
             <div class="char-name">${selectedChar.name}</div>
