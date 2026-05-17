@@ -220,6 +220,52 @@
             font-weight: bold;
             transition: color 0.3s, background 0.3s;
         }
+
+        /* ========================================================
+           【新機能】スマートフォン・タブレット向け（レスポンシブ）
+           ======================================================== */
+        @media (max-width: 768px) {
+            body { padding: 10px; }
+            .container { padding: 15px; margin: 10px auto; }
+            h1 { font-size: 22px; }
+            
+            /* テーマ切り替えを中央に寄せて少し押しやすく */
+            .theme-switcher { text-align: center; margin-bottom: 20px; }
+            .btn-theme { padding: 8px 16px; font-size: 14px; }
+
+            /* 確率表記を改行時も綺麗に見せる */
+            .flex-wrap { gap: 10px; }
+            
+            /* BANリスト：スマホでは2列にして、文字をタップしやすく広げる */
+            .char-pool-container {
+                grid-template-columns: repeat(2, 1fr);
+                max-height: 300px; /* 少し高さを広げてスクロールしやすく */
+            }
+            .checkbox-label {
+                padding: 6px 4px; /* タップ領域の拡大 */
+                font-size: 14px;
+            }
+
+            /* デカい決定ボタンを押しやすく */
+            .btn-main { width: 100%; max-width: 300px; padding: 12px 0; font-size: 18px; }
+
+            /* ★ここが肝！ 4つの選出カードをスマホでは「2列×2段」に変更 */
+            .grid-container {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+            }
+            
+            /* カード内の画像サイズをスマホ画面に合わせて少し縮小 */
+            .char-img { width: 110px; height: 110px; }
+            .char-display { min-height: 180px; }
+            .char-name { font-size: 14px; }
+        }
+
+        /* 超小型スマホ（iPhone SEなど）向けの微調整 */
+        @media (max-width: 380px) {
+            .grid-container { grid-template-columns: 1fr; } /* 1列に縦並び */
+            .char-pool-container { grid-template-columns: 1fr; }
+        }
     </style>
 </head>
 <body>
@@ -278,13 +324,10 @@
 <script>
 const IMAGE_BASE_URL = "https://raw.githubusercontent.com/Ala-Aster/Starward_RandomTool/main/images";
 
-// 70キャラクター全員のデータプール
-// ★【新機能】hasRare を「用意したレア画像の枚数の数字」にします。
-// 例：グリフィンはレア1枚（_rare1.png）、ヒカリはレア2枚（_rare1.png, _rare2.png）
 let characterPool = [
     // --- コスト 3.0 (18名) ---
-    { id: "c001", name: "グリフィン", kana: "ぐりふぃん", cost: "3.0", hasRare: 1 }, // レア画像が2枚ある状態
-    { id: "c002", name: "ヒカリ", kana: "ひかり", cost: "3.0", hasRare: 2 },     // レア画像が1枚ある状態
+    { id: "c001", name: "グリフィン", kana: "ぐりふぃん", cost: "3.0", hasRare: 1 }, 
+    { id: "c002", name: "ヒカリ", kana: "ひかり", cost: "3.0", hasRare: 2 },     
     { id: "c003", name: "エルフィン", kana: "えるふぃん", cost: "3.0" },
     { id: "c004", name: "ケルビム", kana: "けるびむ", cost: "3.0", hasRare: 2 },
     { id: "c005", name: "シュウウ", kana: "しゅうう", cost: "3.0" },
@@ -417,26 +460,17 @@ function rollRandom() {
 
         filteredPool.splice(randomIndex, 1);
 
-        // --------------------------------------------------------
-        // 【アップデート】複数レア画像対応の選出ロジック
-        // --------------------------------------------------------
-        const RARE_PROBABILITY = 0.05; // 出現確率：5%
+        const RARE_PROBABILITY = 0.05;
         let isRareSelected = false;
         let imageSuffix = "";
 
-        // 「確率に当選」かつ「hasRareが設定されており、かつ1以上である」とき
         if (Math.random() < RARE_PROBABILITY && selectedChar.hasRare && selectedChar.hasRare >= 1) {
             isRareSelected = true;
-            
-            // 1から設定枚数(hasRareの数値)までの間でランダムに1つの数字を決める
-            // 例: hasRareが2なら、1か2のどちらかになる
             const rareNum = Math.floor(Math.random() * selectedChar.hasRare) + 1;
-            
-            imageSuffix = "_rare" + rareNum; // 末尾を _rare1 や _rare2 に決定
+            imageSuffix = "_rare" + rareNum;
             cardDiv.classList.add("rare-selected");
         }
 
-        // URLを組み立てる (例: images/3.0/c001_rare2.png)
         const imgUrl = IMAGE_BASE_URL + "/" + selectedChar.cost + "/" + selectedChar.id + imageSuffix + ".png";
         
         displayDiv.innerHTML = `
