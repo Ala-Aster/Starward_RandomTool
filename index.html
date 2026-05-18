@@ -222,6 +222,103 @@
         }
 
         /* ========================================================
+           【調整完了】選出履歴エリアのスタイル（シークバー内蔵版）
+           ======================================================== */
+        .history-section {
+            background: var(--section-bg);
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 30px;
+            text-align: left;
+            transition: background 0.3s;
+        }
+        
+        /* 履歴全体のログコンテナ（キャラクター選択と同様にスクロールバーを実装） */
+        .history-container {
+            max-height: 250px;           /* 最大の高さをキャラクター選択枠と統一 */
+            overflow-y: auto;            /* 縦に溢れた場合に自動でシークバーを表示 */
+            border: 1px solid var(--border-color);
+            padding: 10px;
+            background: var(--list-bg);
+            border-radius: 5px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            box-sizing: border-box;
+            transition: border-color 0.3s, background 0.3s;
+        }
+
+        /* 1回の選出（4人分）を囲う横一行のコンテナ */
+        .history-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr); /* きっちり横に4等分 */
+            gap: 10px;
+            padding: 6px 0;
+            border-bottom: 1px dashed var(--border-color); /* 行の区切り線 */
+            animation: slideDown 0.3s ease-out;
+        }
+        .history-row:last-child {
+            border-bottom: none;
+        }
+
+        /* 履歴の個別キャラチップ */
+        .history-item {
+            display: flex;
+            align-items: center;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            padding: 6px 12px;
+            border-radius: 20px;
+            gap: 8px;
+            box-sizing: border-box;
+            min-width: 0; /* 文字溢れ防止 */
+        }
+        .history-item.is-rare {
+            border-color: #ffcc00;
+            background: rgba(255, 204, 0, 0.05);
+        }
+        .history-img {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 1px solid var(--accent-color);
+            flex-shrink: 0;
+        }
+        .history-item.is-rare .history-img {
+            border-color: #ffcc00;
+        }
+        .history-name {
+            font-size: 13px;
+            font-weight: bold;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis; /* 長い名前は「...」で省略 */
+        }
+        .history-cost {
+            font-size: 11px;
+            color: var(--text-sub);
+            background: var(--bg-color);
+            padding: 1px 6px;
+            border-radius: 8px;
+            flex-shrink: 0;
+            margin-left: auto; /* コストを右端に寄せる */
+        }
+        .history-empty {
+            color: var(--text-sub);
+            font-size: 14px;
+            font-style: italic;
+            padding: 10px;
+            text-align: center;
+            width: 100%;
+        }
+        
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ========================================================
            スマートフォン・タブレット向け（レスポンシブ）
            ======================================================== */
         @media (max-width: 768px) {
@@ -229,42 +326,36 @@
             .container { padding: 15px; margin: 10px auto; }
             h1 { font-size: 22px; }
             
-            /* テーマ切り替えを中央に寄せて少し押しやすく */
             .theme-switcher { text-align: center; margin-bottom: 20px; }
             .btn-theme { padding: 8px 16px; font-size: 14px; }
-
-            /* 確率表記を改行時も綺麗に見せる */
             .flex-wrap { gap: 10px; }
             
-            /* BANリスト：スマホでは2列にして、文字をタップしやすく広げる */
             .char-pool-container {
                 grid-template-columns: repeat(2, 1fr);
-                max-height: 300px; /* 少し高さを広げてスクロールしやすく */
+                max-height: 300px;
             }
-            .checkbox-label {
-                padding: 6px 4px; /* タップ領域の拡大 */
-                font-size: 14px;
-            }
-
-            /* デカい決定ボタンを押しやすく */
+            .checkbox-label { padding: 6px 4px; font-size: 14px; }
             .btn-main { width: 100%; max-width: 300px; padding: 12px 0; font-size: 18px; }
 
-            /* 4つの選出カードをスマホでは「2列×2段」に変更 */
             .grid-container {
                 grid-template-columns: repeat(2, 1fr);
                 gap: 10px;
             }
-            
-            /* カード内の画像サイズをスマホ画面に合わせて少し縮小 */
             .char-img { width: 110px; height: 110px; }
             .char-display { min-height: 180px; }
             .char-name { font-size: 14px; }
+
+            /* スマホ環境での履歴：4列だと狭すぎるので「2列×2行」に自動調整 */
+            .history-row {
+                grid-template-columns: repeat(2, 1fr);
+            }
         }
 
-        /* 超小型スマホ（iPhone SEなど）向けの微調整 */
         @media (max-width: 380px) {
-            .grid-container { grid-template-columns: 1fr; } /* 1列に縦並び */
+            .grid-container { grid-template-columns: 1fr; }
             .char-pool-container { grid-template-columns: 1fr; }
+            /* 超小型スマホでは履歴も1列縦並びに */
+            .history-row { grid-template-columns: 1fr; }
         }
     </style>
 </head>
@@ -290,7 +381,7 @@
                 <label class="checkbox-label" style="display:inline-flex;"><input type="checkbox" class="cost-filter" value="1.5" checked onchange="saveCostSettings()"> 1.5</label>
             </div>
             <div style="margin-left: auto; font-size: 12px; color: var(--text-sub); display: flex; align-items: center;">
-                ※レア画像出現確率：5%
+                ※レア画像出現確率：10%
             </div>
         </div>
 
@@ -317,6 +408,13 @@
         <div class="player-card" id="card-3">
             <div class="player-title">4人目</div>
             <div class="char-display" id="display-3"><div class="char-name">待機中</div></div>
+        </div>
+    </div>
+
+    <div class="history-section">
+        <h3>3. 選出履歴 (リロードでリセット)</h3>
+        <div class="history-container" id="history-log">
+            <div class="history-empty">まだ選出されていません</div>
         </div>
     </div>
 </div>
@@ -403,17 +501,17 @@ let characterPool = [
     { id: "c005", name: "ヤミン", kana: "やみん", cost: "1.5", hasRare: 2 }
 ];
 
-// 【新機能】テーマをローカルストレージに保存＆適用
+// テーマをローカルストレージに保存＆適用
 function setTheme(themeName) {
     if (themeName === 'dark') {
         document.documentElement.removeAttribute('data-theme');
     } else {
         document.documentElement.setAttribute('data-theme', themeName);
     }
-    localStorage.setItem('starward_theme', themeName); // 保存
+    localStorage.setItem('starward_theme', themeName);
 }
 
-// 【新機能】コストの抽出設定を保存する
+// コストの抽出設定を保存する
 function saveCostSettings() {
     const checkedCosts = Array.from(document.querySelectorAll('.cost-filter')).map(el => {
         return { value: el.value, checked: el.checked };
@@ -421,7 +519,7 @@ function saveCostSettings() {
     localStorage.setItem('starward_cost_filters', JSON.stringify(checkedCosts));
 }
 
-// 【新機能】キャラクターの個別ON/OFF（BAN状態）を保存する
+// キャラクターの個別ON/OFF（BAN状態）を保存する
 function saveCharSettings() {
     const charStates = {};
     document.querySelectorAll('.char-toggle').forEach(el => {
@@ -437,7 +535,7 @@ window.onload = function() {
         setTheme(savedTheme);
     }
 
-    // --- 2. コストチェックの復元準備 ---
+    // --- 2. コストチェックの復元 ---
     const savedCosts = localStorage.getItem('starward_cost_filters');
     let costMap = null;
     if (savedCosts) {
@@ -454,7 +552,6 @@ window.onload = function() {
     const container = document.getElementById("individual-toggle-container");
     const costOrder = ["3.0", "2.5", "2.0", "1.5"];
     
-    // 保存されているBANデータの読み込み
     const savedChars = localStorage.getItem('starward_char_filters');
     let charStates = {};
     if (savedChars) {
@@ -476,7 +573,6 @@ window.onload = function() {
                 label.className = "checkbox-label";
                 const charKey = `${c.cost}_${c.id}`;
                 
-                // 過去に保存された状態があればそれを適用、なければ一律初期値はtrue(ON)
                 const isChecked = charStates[charKey] !== undefined ? charStates[charKey] : true;
                 
                 label.innerHTML = `<input type="checkbox" class="char-toggle" value="${charKey}" ${isChecked ? 'checked' : ''} onchange="saveCharSettings()"> ${c.name}`;
@@ -494,6 +590,9 @@ function rollRandom() {
         const charKey = `${c.cost}_${c.id}`;
         return checkedCosts.includes(c.cost) && activeCharKeys.includes(charKey);
     });
+
+    // 今回のボタンクリックで選出されたメンバーを格納する配列
+    let currentRollResults = [];
 
     for (let slot = 0; slot < 4; slot++) {
         const displayDiv = document.getElementById(`display-${slot}`);
@@ -530,7 +629,58 @@ function rollRandom() {
             <div class="char-cost">${selectedChar.cost}</div>
             <div class="rare-badge">${isRareSelected ? '★ 運がいいね ★' : ''}</div>
         `;
+
+        // 履歴追加用のデータを保存
+        currentRollResults.push({
+            name: selectedChar.name,
+            cost: selectedChar.cost,
+            imgUrl: imgUrl,
+            isRare: isRareSelected
+        });
     }
+
+    // 選出が成功していたら履歴UIを更新する
+    if (currentRollResults.length > 0) {
+        updateHistoryUI(currentRollResults);
+    }
+}
+
+// 履歴を4列×縦に積み重ねていく関数
+function updateHistoryUI(newRecords) {
+    const historyContainer = document.getElementById("history-log");
+    
+    // 初回選出時、「まだ選出されていません」のテキストを消去
+    const emptyMsg = historyContainer.querySelector(".history-empty");
+    if (emptyMsg) {
+        historyContainer.innerHTML = "";
+    }
+
+    // 1回分の選出（4人分）をまとめる行（row）を作成
+    const rowDiv = document.createElement("div");
+    rowDiv.className = "history-row";
+
+    // 1人目から4人目までを順番に、この行の中に横並びで追加する
+    newRecords.forEach(char => {
+        const itemDiv = document.createElement("div");
+        itemDiv.className = `history-item ${char.isRare ? 'is-rare' : ''}`;
+        
+        const displayName = char.isRare ? `★${char.name}` : char.name;
+
+        itemDiv.innerHTML = `
+            <img class="history-img" src="${char.imgUrl}" alt="${char.name}" onerror="this.src='https://via.placeholder.com/140?text=No+Image'">
+            <span class="history-name" title="${char.name}">${displayName}</span>
+            <span class="history-cost">${char.cost}</span>
+        `;
+        rowDiv.appendChild(itemDiv);
+    });
+    
+    // 作成した「4人並んだ1行」を、履歴コンテナの【一番上（先頭）】に挿入する
+    // これにより、新しく引いたセットが常に上側、過去ログが下側に並びます
+    historyContainer.insertBefore(rowDiv, historyContainer.firstChild);
+
+    // 【自動スクロール機能】
+    // 新しい履歴が追加された際、スクロールバーの位置を自動で一番上（最新位置）に引き戻します
+    historyContainer.scrollTop = 0;
 }
 </script>
 
