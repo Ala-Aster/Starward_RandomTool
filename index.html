@@ -222,7 +222,7 @@
         }
 
         /* ========================================================
-           【新機能】スマートフォン・タブレット向け（レスポンシブ）
+           スマートフォン・タブレット向け（レスポンシブ）
            ======================================================== */
         @media (max-width: 768px) {
             body { padding: 10px; }
@@ -249,7 +249,7 @@
             /* デカい決定ボタンを押しやすく */
             .btn-main { width: 100%; max-width: 300px; padding: 12px 0; font-size: 18px; }
 
-            /* ★ここが肝！ 4つの選出カードをスマホでは「2列×2段」に変更 */
+            /* 4つの選出カードをスマホでは「2列×2段」に変更 */
             .grid-container {
                 grid-template-columns: repeat(2, 1fr);
                 gap: 10px;
@@ -284,13 +284,13 @@
         <div class="flex-wrap">
             <div>
                 <strong>抽出コスト：</strong>
-                <label class="checkbox-label" style="display:inline-flex;"><input type="checkbox" class="cost-filter" value="3.0" checked> 3.0</label>
-                <label class="checkbox-label" style="display:inline-flex;"><input type="checkbox" class="cost-filter" value="2.5" checked> 2.5</label>
-                <label class="checkbox-label" style="display:inline-flex;"><input type="checkbox" class="cost-filter" value="2.0" checked> 2.0</label>
-                <label class="checkbox-label" style="display:inline-flex;"><input type="checkbox" class="cost-filter" value="1.5" checked> 1.5</label>
+                <label class="checkbox-label" style="display:inline-flex;"><input type="checkbox" class="cost-filter" value="3.0" checked onchange="saveCostSettings()"> 3.0</label>
+                <label class="checkbox-label" style="display:inline-flex;"><input type="checkbox" class="cost-filter" value="2.5" checked onchange="saveCostSettings()"> 2.5</label>
+                <label class="checkbox-label" style="display:inline-flex;"><input type="checkbox" class="cost-filter" value="2.0" checked onchange="saveCostSettings()"> 2.0</label>
+                <label class="checkbox-label" style="display:inline-flex;"><input type="checkbox" class="cost-filter" value="1.5" checked onchange="saveCostSettings()"> 1.5</label>
             </div>
             <div style="margin-left: auto; font-size: 12px; color: var(--text-sub); display: flex; align-items: center;">
-                ※レア画像出現確率：10%
+                ※レア画像出現確率：5%
             </div>
         </div>
 
@@ -403,17 +403,63 @@ let characterPool = [
     { id: "c005", name: "ヤミン", kana: "やみん", cost: "1.5", hasRare: 2 }
 ];
 
+// 【新機能】テーマをローカルストレージに保存＆適用
 function setTheme(themeName) {
     if (themeName === 'dark') {
         document.documentElement.removeAttribute('data-theme');
     } else {
         document.documentElement.setAttribute('data-theme', themeName);
     }
+    localStorage.setItem('starward_theme', themeName); // 保存
+}
+
+// 【新機能】コストの抽出設定を保存する
+function saveCostSettings() {
+    const checkedCosts = Array.from(document.querySelectorAll('.cost-filter')).map(el => {
+        return { value: el.value, checked: el.checked };
+    });
+    localStorage.setItem('starward_cost_filters', JSON.stringify(checkedCosts));
+}
+
+// 【新機能】キャラクターの個別ON/OFF（BAN状態）を保存する
+function saveCharSettings() {
+    const charStates = {};
+    document.querySelectorAll('.char-toggle').forEach(el => {
+        charStates[el.value] = el.checked;
+    });
+    localStorage.setItem('starward_char_filters', JSON.stringify(charStates));
 }
 
 window.onload = function() {
+    // --- 1. テーマの復元 ---
+    const savedTheme = localStorage.getItem('starward_theme');
+    if (savedTheme) {
+        setTheme(savedTheme);
+    }
+
+    // --- 2. コストチェックの復元準備 ---
+    const savedCosts = localStorage.getItem('starward_cost_filters');
+    let costMap = null;
+    if (savedCosts) {
+        try {
+            costMap = JSON.parse(savedCosts);
+            document.querySelectorAll('.cost-filter').forEach(el => {
+                const savedData = costMap.find(item => item.value === el.value);
+                if (savedData) el.checked = savedData.checked;
+            });
+        } catch (e) { console.error("コストデータの復元に失敗しました", e); }
+    }
+
+    // --- 3. キャラクター個別のBANリスト生成と復元 ---
     const container = document.getElementById("individual-toggle-container");
     const costOrder = ["3.0", "2.5", "2.0", "1.5"];
+    
+    // 保存されているBANデータの読み込み
+    const savedChars = localStorage.getItem('starward_char_filters');
+    let charStates = {};
+    if (savedChars) {
+        try { charStates = JSON.parse(savedChars); } catch (e) { console.error(e); }
+    }
     
     costOrder.forEach(targetCost => {
         let group = characterPool.filter(c => c.cost === targetCost);
@@ -428,7 +474,12 @@ window.onload = function() {
             group.forEach(c => {
                 const label = document.createElement("label");
                 label.className = "checkbox-label";
-                label.innerHTML = `<input type="checkbox" class="char-toggle" value="${c.cost}_${c.id}" checked> ${c.name}`;
+                const charKey = `${c.cost}_${c.id}`;
+                
+                // 過去に保存された状態があればそれを適用、なければ一律初期値はtrue(ON)
+                const isChecked = charStates[charKey] !== undefined ? charStates[charKey] : true;
+                
+                label.innerHTML = `<input type="checkbox" class="char-toggle" value="${charKey}" ${isChecked ? 'checked' : ''} onchange="saveCharSettings()"> ${c.name}`;
                 container.appendChild(label);
             });
         }
