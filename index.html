@@ -422,8 +422,10 @@
 <script>
 const IMAGE_BASE_URL = "https://raw.githubusercontent.com/Ala-Aster/Starward_RandomTool/main/images";
 
-let characterPool = [
-    // --- コスト 3.0 (18名) ---
+// ====== CHARACTER_DATA_START ======
+const characterPool = [
+// --- コスト 3.0 (18名) ---
+// --- COST 3.0 START ---
     { id: "c001", name: "グリフィン", kana: "ぐりふぃん", cost: "3.0", hasRare: 1 }, 
     { id: "c002", name: "ヒカリ", kana: "ひかり", cost: "3.0", hasRare: 2 },     
     { id: "c003", name: "エルフィン", kana: "えるふぃん", cost: "3.0" },
@@ -442,8 +444,10 @@ let characterPool = [
     { id: "c016", name: "セイレン", kana: "せいれん", cost: "3.0", hasRare: 1 },
     { id: "c017", name: "無銘", kana: "むめい", cost: "3.0" },
     { id: "c018", name: "アカツキ", kana: "あかつき", cost: "3.0" },
+    // --- COST 3.0 END ---
 
     // --- コスト 2.5 (24名) ---
+    // --- COST 2.5 START ---
     { id: "c001", name: "フリード", kana: "ふりーど", cost: "2.5" },
     { id: "c002", name: "カゼ", kana: "かぜ", cost: "2.5", hasRare: 2 },
     { id: "c003", name: "シャオリン", kana: "しゃおりん", cost: "2.5", hasRare: 1 },
@@ -468,8 +472,10 @@ let characterPool = [
     { id: "c022", name: "レキ", kana: "れき", cost: "2.5" },
     { id: "c023", name: "ブラック★ロックシューター", kana: "ぶらっく★ろっくしゅーたー", cost: "2.5" },
     { id: "c024", name: "デッドマスター", kana: "でっどますたー", cost: "2.5" },
+    // --- COST 2.5 END ---
 
     // --- コスト 2.0 (22名) ---
+    // --- COST 2.0 START ---
     { id: "c001", name: "ベータ", kana: "べーた", cost: "2.0" },
     { id: "c002", name: "デュカリオン", kana: "でゅかりおん", cost: "2.0", hasRare: 2 },
     { id: "c003", name: "セラフィム", kana: "せらふぃむ", cost: "2.0" },
@@ -492,14 +498,18 @@ let characterPool = [
     { id: "c020", name: "クリスタ", kana: "くりすた", cost: "2.0", hasRare: 3 },
     { id: "c021", name: "タチアナ", kana: "たちあな", cost: "2.0", hasRare: 1 },
     { id: "c022", name: "フィービー", kana: "ふぃーびー", cost: "2.0", hasRare: 2 },
+    // --- COST 2.0 END ---
 
     // --- コスト 1.5 (5名) ---
+    // --- COST 1.5 START ---
     { id: "c001", name: "オーキッド", kana: "おーきっど", cost: "1.5" },
     { id: "c002", name: "スノーウォル", kana: "すのーうぉる", cost: "1.5" },
     { id: "c003", name: "カタリナ", kana: "かたりな", cost: "1.5" },
     { id: "c004", name: "ローランド", kana: "ろーらんど", cost: "1.5" },
-    { id: "c005", name: "ヤミン", kana: "やみん", cost: "1.5", hasRare: 2 }
+    { id: "c005", name: "ヤミン", kana: "やみん", cost: "1.5", hasRare: 2 },
+    // --- COST 1.5 END ---
 ];
+// ====== CHARACTER_DATA_END ======
 
 // テーマをローカルストレージに保存＆適用
 function setTheme(themeName) {
