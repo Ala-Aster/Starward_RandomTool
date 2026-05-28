@@ -512,6 +512,54 @@ const characterPool = [
 ];
 // ====== CHARACTER_DATA_END ======
 
+// --- データの初期化・読み込み処理 ---
+function initializeApp() {
+    // 1. まずHTML側にハードコーディングされている最新のキャラクタープールを取得
+    // (characterPool は // --- COST 3.0 START --- などで管理されている配列です)
+    const latestPool = characterPool; 
+
+    // 2. ローカルストレージから過去に保存されたデータを取得
+    const savedPoolJson = localStorage.getItem("characterPool");
+    const savedPool = savedPoolJson ? JSON.parse(savedPoolJson) : null;
+
+    if (savedPool) {
+        // 【ここが重要な仕掛け！】
+        // 保存されているキャラ数と、HTML側の最新のキャラ数を比較する
+        if (savedPool.length < latestPool.length) {
+            console.log("新キャラクターが検出されました。データを自動更新します。");
+            
+            // 新キャラが追加されている場合、HTML側の最新のキャラクタープールをベースにする
+            // ただし、既存のキャラの「BAN設定（ON/OFF状態）」はできるだけ維持したいのでマージする
+            const updatedPool = latestPool.map(latestChar => {
+                // 過去のデータに同じIDのキャラがいたか探す
+                const existingChar = savedPool.find(savedChar => savedChar.id === latestChar.id);
+                if (existingChar) {
+                    // 既にいたキャラなら、ユーザーが設定したON/OFF状態（enabledなど）を引き継ぐ
+                    return { ...latestChar, enabled: existingChar.enabled };
+                }
+                // 新しいキャラなら、初期状態（有効）で追加
+                return { ...latestChar, enabled: true };
+            });
+
+            // 新しく作り直したプールをLocalStorageに上書き保存
+            localStorage.setItem("characterPool", JSON.stringify(updatedPool));
+            
+            // 画面で使うキャラクタープールを更新
+            activeCharacterPool = updatedPool;
+        } else {
+            // キャラ数に変更がなければ、今まで通り保存されたデータを使う
+            activeCharacterPool = savedPool;
+        }
+    } else {
+        // 完全に初めてツールを開く人の場合は最新のプールをそのまま使う
+        activeCharacterPool = latestPool;
+        localStorage.setItem("characterPool", JSON.stringify(latestPool));
+    }
+
+    // この後に、画面（UI）を描画する処理（renderCharacterList等）を呼び出す
+    renderCharacterUI();
+}
+
 // テーマをローカルストレージに保存＆適用
 function setTheme(themeName) {
     if (themeName === 'dark') {
