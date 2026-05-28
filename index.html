@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>星之翼 カスタムランダムセレクト</title>
+    <style>
+        /* ========================================================
+           テーマごとのカラー変数定義
+           ======================================================== */
+        :root {
+            --bg-color: #121212;
+            --container-bg: #1e1e1e;
+            --section-bg: #252525;
+            --card-bg: #2a2a2a;
+            --list-bg: #1a1a1a;
+            --text-main: #ffffff;
+            --text-sub: #aaa;
+            --accent-color: #00ffcc;
+            --border-color: #444;
+            --accent-bg: rgba(0, 255, 204, 0.1);
+            --btn-text: #121212;
+        }
+
+        [data-theme="light"] {
+            --bg-color: #f5f5f7;
+            --container-bg: #ffffff;
+            --section-bg: #f0f0f2;
+            --card-bg: #e8e8ec;
+            --list-bg: #fafafa;
+            --text-main: #1d1d1f;
+            --text-sub: #555555;
+            --accent-color: #0066cc;
+            --border-color: #cccccc;
+            --accent-bg: rgba(0, 102, 204, 0.1);
+            --btn-text: #ffffff;
+        }
+
+        [data-theme="custom"] {
+            --bg-color: #fbf9f1;
+            --container-bg: #f7f4e9;
+            --section-bg: #eee9da;
+            --card-bg: #dfd9c6;
+            --list-bg: #fbf9f1;
+            --text-main: #000000;
+            --text-sub: #444444;
+            --accent-color: #d35400;
+            --border-color: #cca47e;
+            --accent-bg: rgba(211, 84, 0, 0.1);
+            --btn-text: #ffffff;
+        }
+
+        /* 全体の基本スタイル */
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            text-align: center;
+            padding: 20px;
+            margin: 0;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 20px auto;
+            background: var(--container-bg);
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            transition: background 0.3s;
+        }
+        h1 { color: var(--accent-color); font-size: 28px; margin-bottom: 20px; transition: color 0.3s; }
+        
+        .theme-switcher {
+            text-align: right;
+            margin-bottom: 15px;
+        }
+        .btn-theme {
+            background: var(--section-bg);
+            color: var(--text-main);
+            border: 1px solid var(--border-color);
+            padding: 6px 14px;
+            font-size: 13px;
+            font-weight: bold;
+            border-radius: 20px;
+            cursor: pointer;
+            margin-left: 5px;
+            transition: 0.2s;
+        }
+        .btn-theme:hover { border-color: var(--accent-color); }
+
+        .settings-section {
+            background: var(--section-bg);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: left;
+            transition: background 0.3s;
+        }
+        .settings-section h3 { 
+            margin-top: 0; 
+            color: var(--accent-color); 
+            border-bottom: 1px solid var(--border-color); 
+            padding-bottom: 5px; 
+            font-size: 16px; 
+            transition: color 0.3s, border-color 0.3s;
+        }
+        .flex-wrap { display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 15px; }
+        .checkbox-label { display: flex; align-items: center; gap: 5px; cursor: pointer; }
+        
+        .cost-group-title {
+            grid-column: 1 / -1;
+            font-weight: bold;
+            color: var(--accent-color);
+            background: var(--card-bg); 
+            padding: 6px 10px;
+            border-radius: 4px;
+            margin-top: 10px;
+            font-size: 14px;
+            transition: color 0.3s, background 0.3s;
+        }
+        .cost-group-title:first-child { margin-top: 0; }
+
+        .char-pool-container {
+            max-height: 250px;
+            overflow-y: auto;
+            border: 1px solid var(--border-color);
+            padding: 10px;
+            background: var(--list-bg);
+            border-radius: 5px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 8px;
+            transition: border-color 0.3s, background 0.3s;
+        }
+
+        .btn-main {
+            background-color: var(--accent-color); 
+            color: var(--btn-text); 
+            border: none;
+            padding: 15px 40px; font-size: 20px; font-weight: bold;
+            border-radius: 30px; cursor: pointer; transition: 0.2s;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2); margin: 20px 0;
+        }
+        .btn-main:hover { opacity: 0.9; transform: scale(1.02); }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(180px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+            justify-content: center;
+        }
+        
+        .player-card {
+            background: var(--container-bg); 
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            padding: 15px;
+            transition: 0.3s;
+            position: relative;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .player-title { font-size: 16px; font-weight: bold; color: var(--text-sub); margin-bottom: 12px; }
+        
+        .char-display { 
+            width: 100%;
+            min-height: 220px; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: flex-start; 
+        }
+        
+        .char-img { 
+            width: 140px; 
+            height: 140px; 
+            border-radius: 10px; 
+            border: 2px solid var(--accent-color); 
+            object-fit: cover; 
+            margin-bottom: 12px; 
+            background: var(--list-bg); 
+            box-shadow: 0 0 8px rgba(0,0,0,0.1);
+            transition: border-color 0.3s;
+        }
+        
+        /* レア画像選出時のエフェクト */
+        .player-card.rare-selected {
+            border-color: #ffcc00;
+            box-shadow: 0 0 15px rgba(255, 204, 0, 0.6);
+        }
+        .player-card.rare-selected .char-img {
+            border-color: #ffcc00;
+        }
+        .player-card.rare-selected .rare-badge {
+            color: #ffcc00;
+            font-size: 11px;
+            font-weight: bold;
+            margin-top: 2px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .char-name { 
+            font-size: 16px; 
+            font-weight: bold; 
+            word-break: break-all; 
+            line-height: 1.3;
+            margin-bottom: 6px;
+        }
+        .char-cost { 
+            font-size: 13px; 
+            color: var(--accent-color); 
+            background: var(--accent-bg); 
+            padding: 2px 10px; 
+            border-radius: 10px; 
+            font-weight: bold;
+            transition: color 0.3s, background 0.3s;
+        }
+
+        /* ========================================================
+           【調整完了】選出履歴エリアのスタイル（シークバー内蔵版）
+           ======================================================== */
+        .history-section {
+            background: var(--section-bg);
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 30px;
+            text-align: left;
+            transition: background 0.3s;
+        }
+        
+        /* 履歴全体のログコンテナ（キャラクター選択と同様にスクロールバーを実装） */
+        .history-container {
+            max-height: 250px;           /* 最大の高さをキャラクター選択枠と統一 */
+            overflow-y: auto;            /* 縦に溢れた場合に自動でシークバーを表示 */
+            border: 1px solid var(--border-color);
+            padding: 10px;
+            background: var(--list-bg);
+            border-radius: 5px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            box-sizing: border-box;
+            transition: border-color 0.3s, background 0.3s;
+        }
+
+        /* 1回の選出（4人分）を囲う横一行のコンテナ */
+        .history-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr); /* きっちり横に4等分 */
+            gap: 10px;
+            padding: 6px 0;
+            border-bottom: 1px dashed var(--border-color); /* 行の区切り線 */
+            animation: slideDown 0.3s ease-out;
+        }
+        .history-row:last-child {
+            border-bottom: none;
+        }
+
+        /* 履歴の個別キャラチップ */
+        .history-item {
+            display: flex;
+            align-items: center;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            padding: 6px 12px;
+            border-radius: 20px;
+            gap: 8px;
+            box-sizing: border-box;
+            min-width: 0; /* 文字溢れ防止 */
+        }
+        .history-item.is-rare {
+            border-color: #ffcc00;
+            background: rgba(255, 204, 0, 0.05);
+        }
+        .history-img {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 1px solid var(--accent-color);
+            flex-shrink: 0;
+        }
+        .history-item.is-rare .history-img {
+            border-color: #ffcc00;
+        }
+        .history-name {
+            font-size: 13px;
+            font-weight: bold;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis; /* 長い名前は「...」で省略 */
+        }
+        .history-cost {
+            font-size: 11px;
+            color: var(--text-sub);
+            background: var(--bg-color);
+            padding: 1px 6px;
+            border-radius: 8px;
+            flex-shrink: 0;
+            margin-left: auto; /* コストを右端に寄せる */
+        }
+        .history-empty {
+            color: var(--text-sub);
+            font-size: 14px;
+            font-style: italic;
+            padding: 10px;
+            text-align: center;
+            width: 100%;
+        }
+        
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ========================================================
+           スマートフォン・タブレット向け（レスポンシブ）
+           ======================================================== */
+        @media (max-width: 768px) {
+            body { padding: 10px; }
+            .container { padding: 15px; margin: 10px auto; }
+            h1 { font-size: 22px; }
+            
+            .theme-switcher { text-align: center; margin-bottom: 20px; }
+            .btn-theme { padding: 8px 16px; font-size: 14px; }
+            .flex-wrap { gap: 10px; }
+            
+            .char-pool-container {
+                grid-template-columns: repeat(2, 1fr);
+                max-height: 300px;
+            }
+            .checkbox-label { padding: 6px 4px; font-size: 14px; }
+            .btn-main { width: 100%; max-width: 300px; padding: 12px 0; font-size: 18px; }
+
+            .grid-container {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 10px;
+            }
+            .char-img { width: 110px; height: 110px; }
+            .char-display { min-height: 180px; }
+            .char-name { font-size: 14px; }
+
+            /* スマホ環境での履歴：4列だと狭すぎるので「2列×2行」に自動調整 */
+            .history-row {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 380px) {
+            .grid-container { grid-template-columns: 1fr; }
+            .char-pool-container { grid-template-columns: 1fr; }
+            /* 超小型スマホでは履歴も1列縦並びに */
+            .history-row { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="theme-switcher">
+        <button class="btn-theme" onclick="setTheme('dark')">ダーク</button>
+        <button class="btn-theme" onclick="setTheme('light')">ライト</button>
+        <button class="btn-theme" onclick="setTheme('custom')">クリーム</button>
+    </div>
+
+    <h1>星之翼 カスタムランダムセレクト</h1>
+
+    <div class="settings-section">
+        <h3>1. コスト設定</h3>
+        <div class="flex-wrap">
+            <div>
+                <strong>抽出コスト：</strong>
+                <label class="checkbox-label" style="display:inline-flex;"><input type="checkbox" class="cost-filter" value="3.0" checked onchange="saveCostSettings()"> 3.0</label>
+                <label class="checkbox-label" style="display:inline-flex;"><input type="checkbox" class="cost-filter" value="2.5" checked onchange="saveCostSettings()"> 2.5</label>
+                <label class="checkbox-label" style="display:inline-flex;"><input type="checkbox" class="cost-filter" value="2.0" checked onchange="saveCostSettings()"> 2.0</label>
+                <label class="checkbox-label" style="display:inline-flex;"><input type="checkbox" class="cost-filter" value="1.5" checked onchange="saveCostSettings()"> 1.5</label>
+            </div>
+            <div style="margin-left: auto; font-size: 12px; color: var(--text-sub); display: flex; align-items: center;">
+                ※レア画像出現確率：10%
+            </div>
+        </div>
+
+        <h3>2. キャラクターの個別オンオフ（BAN機能）</h3>
+        <div class="char-pool-container" id="individual-toggle-container">
+        </div>
+    </div>
+
+    <button class="btn-main" onclick="rollRandom()">キャラクターを選出する</button>
+
+    <div class="grid-container">
+        <div class="player-card" id="card-0">
+            <div class="player-title">1人目</div>
+            <div class="char-display" id="display-0"><div class="char-name">待機中</div></div>
+        </div>
+        <div class="player-card" id="card-1">
+            <div class="player-title">2人目</div>
+            <div class="char-display" id="display-1"><div class="char-name">待機中</div></div>
+        </div>
+        <div class="player-card" id="card-2">
+            <div class="player-title">3人目</div>
+            <div class="char-display" id="display-2"><div class="char-name">待機中</div></div>
+        </div>
+        <div class="player-card" id="card-3">
+            <div class="player-title">4人目</div>
+            <div class="char-display" id="display-3"><div class="char-name">待機中</div></div>
+        </div>
+    </div>
+
+    <div class="history-section">
+        <h3>3. 選出履歴 (リロードでリセット)</h3>
+        <div class="history-container" id="history-log">
+            <div class="history-empty">まだ選出されていません</div>
+        </div>
+    </div>
+</div>
+
+<script>
+const IMAGE_BASE_URL = "https://raw.githubusercontent.com/Ala-Aster/Starward_RandomTool/main/images";
+
+// ====== CHARACTER_DATA_START ======
+const characterPool = [
+// --- コスト 3.0 (18名) ---
+// --- COST 3.0 START ---
+    { id: "c001", name: "グリフィン", kana: "ぐりふぃん", cost: "3.0", hasRare: 1 }, 
+    { id: "c002", name: "ヒカリ", kana: "ひかり", cost: "3.0", hasRare: 2 },     
+    { id: "c003", name: "エルフィン", kana: "えるふぃん", cost: "3.0", hasRare: 0 },
+    { id: "c004", name: "ケルビム", kana: "けるびむ", cost: "3.0", hasRare: 2 },
+    { id: "c005", name: "シュウウ", kana: "しゅうう", cost: "3.0", hasRare: 0  },
+    { id: "c006", name: "スズラン", kana: "すずらん", cost: "3.0", hasRare: 1 },
+    { id: "c007", name: "キャヴァリー", kana: "きゃばりー", cost: "3.0", hasRare: 0 },
+    { id: "c008", name: "ラジエル", kana: "らじえる", cost: "3.0", hasRare: 1 },
+    { id: "c009", name: "影", kana: "かげ", cost: "3.0", hasRare: 2 },
+    { id: "c010", name: "ライン", kana: "らいん", cost: "3.0", hasRare: 1 },
+    { id: "c011", name: "ロタ", kana: "ろた", cost: "3.0", hasRare: 2 },
+    { id: "c012", name: "イーザー", kana: "いーざー", cost: "3.0", hasRare: 0 },
+    { id: "c013", name: "秋雲", kana: "あきぐも", cost: "3.0", hasRare: 1 },
+    { id: "c014", name: "ベータｰロンギヌス", kana: "べーたーろんぎぬす", cost: "3.0", hasRare: 1 },
+    { id: "c015", name: "キャミイ", kana: "きゃみい", cost: "3.0", hasRare: 1 },
+    { id: "c016", name: "セイレン", kana: "せいれん", cost: "3.0", hasRare: 1 },
+    { id: "c017", name: "無銘", kana: "むめい", cost: "3.0", hasRare: 0 },
+    { id: "c018", name: "アカツキ", kana: "あかつき", cost: "3.0", hasRare: 0 },
+    { id: "c019", name: "ヴォイドセイバー", kana: "うぉいどせいばー", cost:"3.0", hasRare: 0 },
+// --- COST 3.0 END ---
+
+    // --- コスト 2.5 (24名) ---
+    // --- COST 2.5 START ---
+    { id: "c001", name: "フリード", kana: "ふりーど", cost: "2.5", hasRare: 0 },
+    { id: "c002", name: "カゼ", kana: "かぜ", cost: "2.5", hasRare: 2 },
+    { id: "c003", name: "シャオリン", kana: "しゃおりん", cost: "2.5", hasRare: 1 },
+    { id: "c004", name: "シャープ", kana: "しゃーぷ", cost: "2.5", hasRare: 2 },
+    { id: "c005", name: "アリス", kana: "ありす", cost: "2.5", hasRare: 1 },
+    { id: "c006", name: "スカイセイバー", kana: "すkaiせいばー", cost: "2.5", hasRare: 1 },
+    { id: "c007", name: "十八号", kana: "じゅうはちごう", cost: "2.5", hasRare: 0 },
+    { id: "c008", name: "シグナス", kana: "しぐなす", cost: "2.5", hasRare: 0 },
+    { id: "c009", name: "アンジェリス", kana: "あんじぇりす", cost: "2.5", hasRare: 1 },
+    { id: "c010", name: "ヴァルキア", kana: "わるきあ", cost: "2.5", hasRare: 1 },
+    { id: "c011", name: "エヴァ", kana: "えゔぁ", cost: "2.5", hasRare: 1 },
+    { id: "c012", name: "轟雷改", kana: "ごうらいかい", cost: "2.5", hasRare: 0 },
+    { id: "c013", name: "稲", kana: "いな", cost: "2.5", hasRare: 0 },
+    { id: "c014", name: "バーゼラルド", kana: "ばーぜらるど", cost: "2.5", hasRare: 0 },
+    { id: "c015", name: "ノーラ", kana: "のーら", cost: "2.5", hasRare: 0 },
+    { id: "c016", name: "ランスロット", kana: "らんすろっと", cost: "2.5", hasRare: 1 },
+    { id: "c017", name: "サンダーボルト", kana: "さんだーぼると", cost: "2.5", hasRare: 0 },
+    { id: "c018", name: "ガラハッド・暁", kana: "がらはっど・あかつき", cost: "2.5", hasRare: 0 },
+    { id: "c019", name: "デッド・アライブ", kana: "でっど・あらいぶ", cost: "2.5", hasRare: 0 },
+    { id: "c020", name: "ハルカ", kana: "はるか", cost: "2.5", hasRare: 1 },
+    { id: "c021", name: "ドラグナー", kana: "どらぐなー", cost: "2.5", hasRare: 1 },
+    { id: "c022", name: "レキ", kana: "れき", cost: "2.5", hasRare: 0 },
+    { id: "c023", name: "ブラック★ロックシューター", kana: "ぶらっく★ろっくしゅーたー", cost: "2.5", hasRare: 0 },
+    { id: "c024", name: "デッドマスター", kana: "でっどますたー", cost: "2.5", hasRare: 0 },
+    // --- COST 2.5 END ---
+
+    // --- コスト 2.0 (22名) ---
+    // --- COST 2.0 START ---
+    { id: "c001", name: "ベータ", kana: "べーた", cost: "2.0", hasRare: 0 },
+    { id: "c002", name: "デュカリオン", kana: "でゅかりおん", cost: "2.0", hasRare: 2 },
+    { id: "c003", name: "セラフィム", kana: "せらふぃむ", cost: "2.0", hasRare: 0 },
+    { id: "c004", name: "アイーダ", kana: "あいーだ", cost: "2.0", hasRare: 2 },
+    { id: "c005", name: "パラス", kana: "ぱらす", cost: "2.0", hasRare: 0 },
+    { id: "c006", name: "スコーピオン", kana: "すこーぴおん", cost: "2.0", hasRare: 1 },
+    { id: "c007", name: "ヴァーチェ", kana: "わーちぇ", cost: "2.0", hasRare: 1 },
+    { id: "c008", name: "ザハロワ", kana: "ざはろわ", cost: "2.0", hasRare: 0 },
+    { id: "c009", name: "咲迦", kana: "えみか", cost: "2.0", hasRare: 0 },
+    { id: "c010", name: "チンニ", kana: "ちんに", cost: "2.0", hasRare: 0 },
+    { id: "c011", name: "ダークスター", kana: "だーくすたー", cost: "2.0", hasRare: 0 },
+    { id: "c012", name: "ヒビキ", kana: "ひびき", cost: "2.0", hasRare: 2 },
+    { id: "c013", name: "スティレット", kana: "すてぃれっと", cost: "2.0", hasRare: 0 },
+    { id: "c014", name: "ボルゾイ", kana: "ぼるぞい", cost: "2.0", hasRare: 1 },
+    { id: "c015", name: "キャッティ", kana: "きゃってぃ", cost: "2.0", hasRare: 1 },
+    { id: "c016", name: "ブリーカー", kana: "ぶりーかー", cost: "2.0", hasRare: 1 },
+    { id: "c017", name: "ガラハッド", kana: "がらはっど", cost: "2.0", hasRare: 0 },
+    { id: "c018", name: "フランカー", kana: "ふらんかー", cost: "2.0", hasRare: 1 },
+    { id: "c019", name: "アイスリン", kana: "あいすりん", cost: "2.0", hasRare: 1 },
+    { id: "c020", name: "クリスタ", kana: "くりすた", cost: "2.0", hasRare: 3 },
+    { id: "c021", name: "タチアナ", kana: "たちあな", cost: "2.0", hasRare: 1 },
+    { id: "c022", name: "フィービー", kana: "ふぃーびー", cost: "2.0", hasRare: 2 },
+    // --- COST 2.0 END ---
+
+    // --- コスト 1.5 (5名) ---
+    // --- COST 1.5 START ---
+    { id: "c001", name: "オーキッド", kana: "おーきっど", cost: "1.5", hasRare: 0 },
+    { id: "c002", name: "スノーウォル", kana: "すのーうぉる", cost: "1.5", hasRare: 0 },
+    { id: "c003", name: "カタリナ", kana: "かたりな", cost: "1.5", hasRare: 0 },
+    { id: "c004", name: "ローランド", kana: "ろーらんど", cost: "1.5", hasRare: 0 },
+    { id: "c005", name: "ヤミン", kana: "やみん", cost: "1.5", hasRare: 2 },
+    // --- COST 1.5 END ---
+];
+// ====== CHARACTER_DATA_END ======
+
+// テーマをローカルストレージに保存＆適用
+function setTheme(themeName) {
+    if (themeName === 'dark') {
+        document.documentElement.removeAttribute('data-theme');
+    } else {
+        document.documentElement.setAttribute('data-theme', themeName);
+    }
+    localStorage.setItem('starward_theme', themeName);
+}
+
+// コストの抽出設定を保存する
+function saveCostSettings() {
+    const checkedCosts = Array.from(document.querySelectorAll('.cost-filter')).map(el => {
+        return { value: el.value, checked: el.checked };
+    });
+    localStorage.setItem('starward_cost_filters', JSON.stringify(checkedCosts));
+}
+
+// キャラクターの個別ON/OFF（BAN状態）を保存する
+function saveCharSettings() {
+    const charStates = {};
+    document.querySelectorAll('.char-toggle').forEach(el => {
+        charStates[el.value] = el.checked;
+    });
+    localStorage.setItem('starward_char_filters', JSON.stringify(charStates));
+}
+
+window.onload = function() {
+    // --- 1. テーマの復元 ---
+    const savedTheme = localStorage.getItem('starward_theme');
+    if (savedTheme) {
+        setTheme(savedTheme);
+    }
+
+    // --- 2. コストチェックの復元 ---
+    const savedCosts = localStorage.getItem('starward_cost_filters');
+    let costMap = null;
+    if (savedCosts) {
+        try {
+            costMap = JSON.parse(savedCosts);
+            document.querySelectorAll('.cost-filter').forEach(el => {
+                const savedData = costMap.find(item => item.value === el.value);
+                if (savedData) el.checked = savedData.checked;
+            });
+        } catch (e) { console.error("コストデータの復元に失敗しました", e); }
+    }
+
+    // --- 3. キャラクター個別のBANリスト生成と復元 ---
+    const container = document.getElementById("individual-toggle-container");
+    const costOrder = ["3.0", "2.5", "2.0", "1.5"];
+    
+    const savedChars = localStorage.getItem('starward_char_filters');
+    let charStates = {};
+    if (savedChars) {
+        try { charStates = JSON.parse(savedChars); } catch (e) { console.error(e); }
+    }
+    
+    costOrder.forEach(targetCost => {
+        let group = characterPool.filter(c => c.cost === targetCost);
+        group.sort((a, b) => a.kana.localeCompare(b.kana, 'ja'));
+        
+        if (group.length > 0) {
+            const titleDiv = document.createElement("div");
+            titleDiv.className = "cost-group-title";
+            titleDiv.innerText = `▼ コスト ${targetCost}`;
+            container.appendChild(titleDiv);
+            
+            group.forEach(c => {
+                const label = document.createElement("label");
+                label.className = "checkbox-label";
+                const charKey = `${c.cost}_${c.id}`;
+                
+                const isChecked = charStates[charKey] !== undefined ? charStates[charKey] : true;
+                
+                label.innerHTML = `<input type="checkbox" class="char-toggle" value="${charKey}" ${isChecked ? 'checked' : ''} onchange="saveCharSettings()"> ${c.name}`;
+                container.appendChild(label);
+            });
+        }
+    });
+};
+
+function rollRandom() {
+    const checkedCosts = Array.from(document.querySelectorAll('.cost-filter:checked')).map(el => el.value);
+    const activeCharKeys = Array.from(document.querySelectorAll('.char-toggle:checked')).map(el => el.value);
+
+    let filteredPool = characterPool.filter(c => {
+        const charKey = `${c.cost}_${c.id}`;
+        return checkedCosts.includes(c.cost) && activeCharKeys.includes(charKey);
+    });
+
+    // 今回のボタンクリックで選出されたメンバーを格納する配列
+    let currentRollResults = [];
+
+    for (let slot = 0; slot < 4; slot++) {
+        const displayDiv = document.getElementById(`display-${slot}`);
+        const cardDiv = document.getElementById(`card-${slot}`);
+
+        cardDiv.classList.remove("rare-selected");
+
+        if (filteredPool.length === 0) {
+            displayDiv.innerHTML = '<div class="char-name" style="color:#ff4444; margin-top:90px;">候補なし</div>';
+            continue;
+        }
+
+        const randomIndex = Math.floor(Math.random() * filteredPool.length);
+        const selectedChar = filteredPool[randomIndex];
+
+        filteredPool.splice(randomIndex, 1);
+
+        const RARE_PROBABILITY = 0.05;
+        let isRareSelected = false;
+        let imageSuffix = "";
+
+        if (Math.random() < RARE_PROBABILITY && selectedChar.hasRare && selectedChar.hasRare >= 1) {
+            isRareSelected = true;
+            const rareNum = Math.floor(Math.random() * selectedChar.hasRare) + 1;
+            imageSuffix = "_rare" + rareNum;
+            cardDiv.classList.add("rare-selected");
+        }
+
+        const imgUrl = IMAGE_BASE_URL + "/" + selectedChar.cost + "/" + selectedChar.id + imageSuffix + ".png";
+        
+        displayDiv.innerHTML = `
+            <img class="char-img" src="${imgUrl}" alt="${selectedChar.name}" onerror="this.src='https://via.placeholder.com/140?text=No+Image'">
+            <div class="char-name">${selectedChar.name}</div>
+            <div class="char-cost">${selectedChar.cost}</div>
+            <div class="rare-badge">${isRareSelected ? '★ 運がいいね ★' : ''}</div>
+        `;
+
+        // 履歴追加用のデータを保存
+        currentRollResults.push({
+            name: selectedChar.name,
+            cost: selectedChar.cost,
+            imgUrl: imgUrl,
+            isRare: isRareSelected
+        });
+    }
+
+    // 選出が成功していたら履歴UIを更新する
+    if (currentRollResults.length > 0) {
+        updateHistoryUI(currentRollResults);
+    }
+}
+
+// 履歴を4列×縦に積み重ねていく関数
+function updateHistoryUI(newRecords) {
+    const historyContainer = document.getElementById("history-log");
+    
+    // 初回選出時、「まだ選出されていません」のテキストを消去
+    const emptyMsg = historyContainer.querySelector(".history-empty");
+    if (emptyMsg) {
+        historyContainer.innerHTML = "";
+    }
+
+    // 1回分の選出（4人分）をまとめる行（row）を作成
+    const rowDiv = document.createElement("div");
+    rowDiv.className = "history-row";
+
+    // 1人目から4人目までを順番に、この行の中に横並びで追加する
+    newRecords.forEach(char => {
+        const itemDiv = document.createElement("div");
+        itemDiv.className = `history-item ${char.isRare ? 'is-rare' : ''}`;
+        
+        const displayName = char.isRare ? `★${char.name}` : char.name;
+
+        itemDiv.innerHTML = `
+            <img class="history-img" src="${char.imgUrl}" alt="${char.name}" onerror="this.src='https://via.placeholder.com/140?text=No+Image'">
+            <span class="history-name" title="${char.name}">${displayName}</span>
+            <span class="history-cost">${char.cost}</span>
+        `;
+        rowDiv.appendChild(itemDiv);
+    });
+    
+    // 作成した「4人並んだ1行」を、履歴コンテナの【一番上（先頭）】に挿入する
+    // これにより、新しく引いたセットが常に上側、過去ログが下側に並びます
+    historyContainer.insertBefore(rowDiv, historyContainer.firstChild);
+
+    // 【自動スクロール機能】
+    // 新しい履歴が追加された際、スクロールバーの位置を自動で一番上（最新位置）に引き戻します
+    historyContainer.scrollTop = 0;
+}
+</script>
+
+</body>
+</html>
